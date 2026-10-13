@@ -12,6 +12,13 @@ public class MachineGunEnemy : MonoBehaviour
     public float bulletSpread = 0.05f;
     public float tracerDuration = 0.04f;
 
+    [Header("Ajustes de Retirada y Melé")]
+    public float retreatRange = 5f;      // Distancia de confort: si el jugador cruza este radio hacia adentro, el enemigo retrocede
+    public float meleeRange = 1.2f;      // Distancia para ejecutar el ataque cuerpo a cuerpo
+    public float meleeDamage = 15f;      // Daño del ataque cuerpo a cuerpo
+    public float meleePushForce = 5f;    // Fuerza de empuje al jugador
+    public float meleeCooldown = 1.5f;   // Tiempo de espera entre ataques cuerpo a cuerpo
+
     [Header("Capas de Colisión")]
     public LayerMask collisionLayers;
 
@@ -25,6 +32,7 @@ public class MachineGunEnemy : MonoBehaviour
     private NavMeshAgent agent;
     private Transform playerTransform;
     private float nextFireTime = 0f;
+    private float nextMeleeTime = 0f;
 
     void Start()
     {
@@ -36,7 +44,7 @@ public class MachineGunEnemy : MonoBehaviour
             playerTransform = playerObj.transform;
         }
 
-        agent.stoppingDistance = shootingRange - 2f;
+        agent.stoppingDistance = retreatRange;
 
         if (lineRenderer != null)
         {
@@ -50,17 +58,46 @@ public class MachineGunEnemy : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
-        agent.SetDestination(playerTransform.position);
-
-        if (distanceToPlayer <= shootingRange)
+        // 1. Rango Cuerpo a Cuerpo (Aproximadamente 1 metro o menos)
+        if (distanceToPlayer <= meleeRange)
         {
             RotateTowardsPlayer();
+            agent.SetDestination(transform.position); // Detener movimiento de navegación normal
+
+            if (Time.time >= nextMeleeTime)
+            {
+                nextMeleeTime = Time.time + meleeCooldown;
+                MeleeAttack();
+            }
+        }
+        // 2. Rango de Retirada (El jugador entró demasiado en el área del enemigo)
+        else if (distanceToPlayer < retreatRange)
+        {
+            // Calcular dirección opuesta al jugador para reubicarse/retirarse
+            Vector3 dirToPlayer = (playerTransform.position - transform.position).normalized;
+            Vector3 retreatPosition = transform.position - dirToPlayer * (retreatRange + 2f);
+
+            agent.SetDestination(retreatPosition);
+            // El enemigo deja de disparar mientras retrocede
+        }
+        // 3. Rango de Disparo (Distancia media óptima)
+        else if (distanceToPlayer <= shootingRange)
+        {
+            RotateTowardsPlayer();
+            agent.SetDestination(playerTransform.position);
+            agent.stoppingDistance = retreatRange;
 
             if (Time.time >= nextFireTime)
             {
                 nextFireTime = Time.time + fireRate;
                 ShootHitscan();
             }
+        }
+        // 4. Fuera de rango (Perseguir al jugador)
+        else
+        {
+            agent.SetDestination(playerTransform.position);
+            agent.stoppingDistance = retreatRange;
         }
     }
 
@@ -94,7 +131,6 @@ public class MachineGunEnemy : MonoBehaviour
         {
             endPoint = hit.point;
 
-            // Buscar PlayerShield primero, y PlayerHealth como respaldo en el objeto impactado o padres
             PlayerShield playerShield = hit.collider.GetComponent<PlayerShield>();
             if (playerShield == null) playerShield = hit.collider.GetComponentInParent<PlayerShield>();
             if (playerShield == null) playerShield = hit.collider.GetComponentInChildren<PlayerShield>();
@@ -136,6 +172,38 @@ public class MachineGunEnemy : MonoBehaviour
         }
     }
 
+    void MeleeAttack()
+    {
+        // Dañar al jugador (Shield o Health)
+        PlayerShield playerShield = playerTransform.GetComponent<PlayerShield>();
+        if (playerShield != null) playerShield.TakeDamage(meleeDamage);
+
+        PlayerHealth playerHealth = playerTransform.GetComponent<PlayerHealth>();
+        if (playerHealth != null) playerHealth.TakeDamage(meleeDamage);
+
+        // Empuje físico si el jugador utiliza CharacterController
+        CharacterController playerController = playerTransform.GetComponent<CharacterController>();
+        if (playerController != null)
+        {
+            StartCoroutine(PushPlayerRoutine(playerController));
+        }
+    }
+
+    IEnumerator PushPlayerRoutine(CharacterController controller)
+    {
+        float duration = 0.2f;
+        float elapsed = 0f;
+        Vector3 pushDir = (playerTransform.position - transform.position).normalized;
+        pushDir.y = 0;
+
+        while (elapsed < duration)
+        {
+            controller.Move(pushDir * meleePushForce * Time.deltaTime);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
+
     IEnumerator ShowTracer(Vector3 startPos, Vector3 endPos)
     {
         lineRenderer.SetPosition(0, startPos);
@@ -151,5 +219,11 @@ public class MachineGunEnemy : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, shootingRange);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, retreatRange);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, meleeRange);
     }
 }

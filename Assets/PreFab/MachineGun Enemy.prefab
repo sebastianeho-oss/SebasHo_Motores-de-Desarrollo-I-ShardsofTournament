@@ -315,7 +315,7 @@ MonoBehaviour:
   tracerDuration: 0.04
   collisionLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 456
   firePoint: {fileID: 1722468020077195834}
   lineRenderer: {fileID: 5041487941422215332}
   muzzleFlash: {fileID: 0}
