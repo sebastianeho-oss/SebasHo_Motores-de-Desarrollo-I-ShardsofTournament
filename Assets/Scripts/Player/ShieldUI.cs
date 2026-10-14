@@ -5,23 +5,30 @@ using TMPro;
 public class ShieldUI : MonoBehaviour
 {
     [Header("Referencias UI")]
-    public Slider shieldSlider;          // La barra de escudo (Slider)
+    public Image shieldFillImage;        // Imagen con Image Type: Filled
     public TextMeshProUGUI shieldText;   // El texto de la cifra del escudo (TMP)
 
     [Header("Referencia del Jugador")]
-    public PlayerShield playerShield;    // Script PlayerShield del personaje
+    public PlayerShield playerShield;    // Script PlayerShield del personaje[cite: 1]
 
-    [Header("Efecto Visual")]
-    public float fillSpeed = 5f;         // Velocidad de suavizado de la barra
+    [Header("Efecto Visual y Color")]
+    public float fillSpeed = 5f;         // Velocidad de suavizado de la barra[cite: 1]
+
+    [Tooltip("Gradiente de color: el extremo izquierdo (0) es 0% de escudo y el derecho (1) es 100% de escudo.")]
+    public Gradient shieldGradient;      // Gradiente configurable desde el Inspector
 
     void Start()
     {
-        if (playerShield != null && shieldSlider != null)
+        if (playerShield != null && shieldFillImage != null)
         {
-            // Configurar rangos del Slider de escudo
-            shieldSlider.minValue = 0f;
-            shieldSlider.maxValue = playerShield.maxShield;
-            shieldSlider.value = playerShield.currentShield;
+            float fillPercentage = playerShield.currentShield / playerShield.maxShield;
+            shieldFillImage.fillAmount = fillPercentage;
+
+            // Aplicar el color inicial según el gradiente
+            if (shieldGradient != null)
+            {
+                shieldFillImage.color = shieldGradient.Evaluate(fillPercentage);
+            }
         }
     }
 
@@ -29,13 +36,22 @@ public class ShieldUI : MonoBehaviour
     {
         if (playerShield == null) return;
 
-        // Transición suave del valor de la barra de escudo
-        if (shieldSlider != null)
+        // Calcular el porcentaje objetivo (actual / máximo)
+        float targetFill = playerShield.currentShield / playerShield.maxShield;
+
+        // Transición suave del valor de la imagen de escudo
+        if (shieldFillImage != null)
         {
-            shieldSlider.value = Mathf.Lerp(shieldSlider.value, playerShield.currentShield, Time.deltaTime * fillSpeed);
+            shieldFillImage.fillAmount = Mathf.Lerp(shieldFillImage.fillAmount, targetFill, Time.deltaTime * fillSpeed);
+
+            // Cambiar el color de la barra dinámicamente usando el gradiente basado en el fillAmount actual
+            if (shieldGradient != null)
+            {
+                shieldFillImage.color = shieldGradient.Evaluate(shieldFillImage.fillAmount);
+            }
         }
 
-        // Actualizar cifra de escudo en pantalla
+        // Actualizar cifra de escudo en pantalla[cite: 1]
         if (shieldText != null)
         {
             int currentS = Mathf.CeilToInt(playerShield.currentShield);

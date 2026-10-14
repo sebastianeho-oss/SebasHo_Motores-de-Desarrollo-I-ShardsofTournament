@@ -17,14 +17,25 @@ public class WaveUIController : MonoBehaviour
     {
         if (waveSpawner == null) return;
 
+        // Ocultar o mostrar el texto de la oleada según si está en tiempo de espera
         if (waveText != null)
         {
-            waveText.text = $"Oleada: {waveSpawner.CurrentWaveNumber} / {waveSpawner.TotalWaves}";
+            if (waveSpawner.IsCountingDown)
+            {
+                // Si está esperando a la siguiente oleada, se oculta
+                waveText.gameObject.SetActive(false);
+            }
+            else
+            {
+                // Si no está contando para la siguiente oleada, se muestra y actualiza
+                waveText.gameObject.SetActive(true);
+                waveText.text = $"Oleada: {waveSpawner.CurrentWaveNumber} / {waveSpawner.TotalWaves}";
+            }
         }
 
         if (enemiesRemainingText != null)
         {
-            enemiesRemainingText.text = $"Enemigos restantes: {waveSpawner.EnemiesRemaining}";
+            enemiesRemainingText.text = $"Vivos: {waveSpawner.EnemiesRemaining}";
         }
 
         if (enemiesKilledText != null)
