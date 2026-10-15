@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 
@@ -149,5 +149,22 @@ public class GameManager : MonoBehaviour
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    // --- MÉTODOS AÑADIDOS PARA EL CÓDICE ---
+    public void OpenCodexGame()
+    {
+        IsPaused = true;
+        Time.timeScale = 0f;
+        if (HUD != null) HUD.SetActive(false);
+        UnlockCursor();
+    }
+
+    public void CloseCodexGame()
+    {
+        IsPaused = false;
+        Time.timeScale = 1f;
+        if (HUD != null) HUD.SetActive(true);
+        LockCursor();
     }
 }
