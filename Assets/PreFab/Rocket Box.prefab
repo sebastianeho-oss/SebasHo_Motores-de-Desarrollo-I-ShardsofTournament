@@ -125,7 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c857373bc683a904da69a259652ba2f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  ammoType: 1
+  ammoType: 5
   ammoAmount: 1
   rotationSpeed: 50
   floatSpeed: 2

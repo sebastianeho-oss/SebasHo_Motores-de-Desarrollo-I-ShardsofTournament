@@ -5,7 +5,7 @@ using UnityEngine;
 public class WaveSpawner : MonoBehaviour
 {
     [SerializeField] private ShopManager shopManager;
-    [SerializeField] private GameManager gameManager; // Referencia para controlar el GameOver[cite: 6, 8]
+    [SerializeField] private GameManager gameManager; // Referencia para controlar el GameOver
 
     [Header("Configuración de Olas y Spawns")]
     [SerializeField] private List<WaveData> waves;
@@ -15,6 +15,12 @@ public class WaveSpawner : MonoBehaviour
     [SerializeField] private GameObject shopPodPrefab;
     [SerializeField] private Transform[] shopSpawnPoints;
     private GameObject activeShopPod;
+
+    [Header("Configuración de Objetos Recogibles / Consumibles")]
+    [SerializeField] private List<GameObject> consumablePrefabs; // Lista de objetos que pueden aparecer
+    [SerializeField] private Transform[] itemSpawnPoints;        // Puntos específicos para los objetos
+    [SerializeField] private int itemsToSpawnPerWave = 3;        // Cantidad de objetos que aparecerán por ronda
+    private List<GameObject> activeItems = new List<GameObject>(); // Instancias activas en el mapa
 
     private int currentWaveIndex = 0;
     private int activeEnemiesCount = 0;
@@ -66,7 +72,7 @@ public class WaveSpawner : MonoBehaviour
         {
             activeWaveRemainingTime -= Time.deltaTime;
 
-            // Al llegar a 0 se detiene la ronda y activa el GameOver[cite: 6, 8]
+            // Al llegar a 0 se detiene la ronda y activa el GameOver
             if (activeWaveRemainingTime <= 0f)
             {
                 activeWaveRemainingTime = 0f;
@@ -113,6 +119,7 @@ public class WaveSpawner : MonoBehaviour
         isWaveActive = false;
 
         SpawnShopPod();
+        SpawnConsumableItems(); // Aparecen los objetos al empezar la fase de descanso/preparación
 
         while (waveTimer > 0)
         {
@@ -122,6 +129,8 @@ public class WaveSpawner : MonoBehaviour
         isCountingDown = false;
 
         CloseAndDespawnShop();
+        // Opcional: si quieres que los objetos no recogidos desaparezcan al iniciar la ronda, descomenta la siguiente línea:
+        // ClearActiveItems(); 
 
         // --- FASE DE COMBATE ---
         isWaveActive = true;
@@ -175,6 +184,45 @@ public class WaveSpawner : MonoBehaviour
         }
     }
 
+    // --- MÉTODOS PARA OBJETOS CONSUMIBLES ---
+
+    private void SpawnConsumableItems()
+    {
+        // Comprobación de seguridad: si no hay prefabs configurados o la matriz de puntos está vacía o es nula, sale sin hacer nada.
+        if (consumablePrefabs == null || consumablePrefabs.Count == 0 || itemSpawnPoints == null || itemSpawnPoints.Length == 0)
+            return;
+
+        // Limpiamos la lista por si acaso quedó algo de la ronda anterior
+        ClearActiveItems();
+
+        List<Transform> availablePoints = new List<Transform>(itemSpawnPoints);
+        int spawnCount = Mathf.Min(itemsToSpawnPerWave, availablePoints.Count);
+
+        for (int i = 0; i < spawnCount; i++)
+        {
+            int randomIndexPoint = Random.Range(0, availablePoints.Count);
+            Transform spawnPoint = availablePoints[randomIndexPoint];
+            availablePoints.RemoveAt(randomIndexPoint); // Evita duplicar objetos en el mismo punto
+
+            GameObject randomPrefab = consumablePrefabs[Random.Range(0, consumablePrefabs.Count)];
+            GameObject itemInstance = Instantiate(randomPrefab, spawnPoint.position, spawnPoint.rotation);
+
+            activeItems.Add(itemInstance);
+        }
+    }
+
+    private void ClearActiveItems()
+    {
+        foreach (GameObject item in activeItems)
+        {
+            if (item != null)
+            {
+                Destroy(item);
+            }
+        }
+        activeItems.Clear();
+    }
+
     private List<GameObject> BuildEnemyList(WaveData wave)
     {
         List<GameObject> list = new List<GameObject>();
@@ -211,7 +259,7 @@ public class WaveSpawner : MonoBehaviour
 
         if (activeEnemiesCount <= 0 && !isSpawning)
         {
-            isWaveActive = false; // Desactiva la cuenta regresiva antes de que llegue a 0[cite: 8]
+            isWaveActive = false; // Desactiva la cuenta regresiva antes de que llegue a 0
 
             Debug.Log("¡Ola " + (currentWaveIndex + 1) + " completada!");
 

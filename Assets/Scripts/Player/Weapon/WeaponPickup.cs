@@ -6,6 +6,12 @@ public class WeaponPickup : MonoBehaviour
     [Tooltip("Índice del arma en el WeaponHolder (0 a 5)")]
     public int weaponIndex = 0;
 
+    [Header("Configuración de Munición por Duplicado")]
+    [Tooltip("Tipo de munición que utiliza esta arma")]
+    public AmmoType ammoType;
+    [Tooltip("Cantidad de munición que se añade a la reserva si el jugador ya posee el arma")]
+    public int ammoAmountOnDuplicate = 30;
+
     [Tooltip("Efecto de sonido opcional")]
     public AudioClip pickupSound;
 
@@ -40,10 +46,33 @@ public class WeaponPickup : MonoBehaviour
             switcher = other.GetComponentInChildren<WeaponSwitcher>();
         }
 
+        // Buscar el inventario de munición
+        PlayerAmmoInventory playerAmmo = other.GetComponent<PlayerAmmoInventory>();
+        if (playerAmmo == null)
+        {
+            playerAmmo = other.GetComponentInParent<PlayerAmmoInventory>();
+        }
+
         if (switcher != null)
         {
-            // Desbloquea el arma y la equipa automáticamente
+            // Intentamos desbloquear el arma. (Nota: Si tu WeaponSwitcher devuelve un bool indicando si ya la tenía, puedes usarlo aquí).
+            // Por defecto, llamamos a desbloquear y equipar.
             switcher.UnlockWeapon(weaponIndex, autoEquip: true);
+
+            // Si el jugador ya tiene el arma (o quieres que siempre otorgue munición al pasar por encima), 
+            // le inyectamos la munición a la reserva usando tu método AddAmmo.
+            if (playerAmmo != null)
+            {
+                int addedAmmo = playerAmmo.AddAmmo(ammoType, ammoAmountOnDuplicate);
+                if (addedAmmo > 0)
+                {
+                    Debug.Log($"¡Recogiste munición extra del arma! Se añadieron {addedAmmo} unidades de {ammoType}.");
+                }
+                else
+                {
+                    Debug.Log($"Reserva de {ammoType} al máximo. Arma recogida/equipada pero sin munición extra.");
+                }
+            }
 
             if (pickupSound != null)
             {
