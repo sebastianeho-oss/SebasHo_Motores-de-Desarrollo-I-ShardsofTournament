@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4951862020922005523}
   - component: {fileID: 6307085901648668048}
   m_Layer: 0
-  m_Name: Codex Page
+  m_Name: Codex Page 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -126,4 +126,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   pageIndexToUnlock: 0
-  interactionKey: 101

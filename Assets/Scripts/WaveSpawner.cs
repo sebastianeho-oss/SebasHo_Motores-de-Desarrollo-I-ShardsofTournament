@@ -22,6 +22,12 @@ public class WaveSpawner : MonoBehaviour
     [SerializeField] private int itemsToSpawnPerWave = 3;        // Cantidad de objetos que aparecerán por ronda
     private List<GameObject> activeItems = new List<GameObject>(); // Instancias activas en el mapa
 
+    [Header("Configuración de Páginas de Códice")]
+    [SerializeField] private List<GameObject> codexPagesPrefabs; // Las 6 páginas de códice
+    [SerializeField] private Transform[] codexSpawnPoints;       // Puntos específicos donde pueden aparecer las páginas
+    private List<GameObject> remainingCodexPages = new List<GameObject>();
+    private GameObject activeCodexInstance;
+
     private int currentWaveIndex = 0;
     private int activeEnemiesCount = 0;
     private int totalEnemiesInCurrentWave = 0;
@@ -56,6 +62,8 @@ public class WaveSpawner : MonoBehaviour
 
     private void Start()
     {
+        ResetCodexPages();
+
         if (waves.Count > 0)
         {
             StartCoroutine(StartNextWave());
@@ -63,6 +71,15 @@ public class WaveSpawner : MonoBehaviour
         else
         {
             Debug.LogWarning("No se asignaron WaveData al WaveSpawner.");
+        }
+    }
+
+    private void ResetCodexPages()
+    {
+        if (codexPagesPrefabs != null)
+        {
+            remainingCodexPages = new List<GameObject>(codexPagesPrefabs);
+            remainingCodexPages.RemoveAll(page => page == null);
         }
     }
 
@@ -119,7 +136,8 @@ public class WaveSpawner : MonoBehaviour
         isWaveActive = false;
 
         SpawnShopPod();
-        SpawnConsumableItems(); // Aparecen los objetos al empezar la fase de descanso/preparación
+        SpawnConsumableItems();
+        TrySpawnCodexPage(); // Evaluará dinámicamente si debe soltar una página en esta ronda
 
         while (waveTimer > 0)
         {
@@ -129,8 +147,6 @@ public class WaveSpawner : MonoBehaviour
         isCountingDown = false;
 
         CloseAndDespawnShop();
-        // Opcional: si quieres que los objetos no recogidos desaparezcan al iniciar la ronda, descomenta la siguiente línea:
-        // ClearActiveItems(); 
 
         // --- FASE DE COMBATE ---
         isWaveActive = true;
@@ -188,21 +204,32 @@ public class WaveSpawner : MonoBehaviour
 
     private void SpawnConsumableItems()
     {
-        // Comprobación de seguridad: si no hay prefabs configurados o la matriz de puntos está vacía o es nula, sale sin hacer nada.
-        if (consumablePrefabs == null || consumablePrefabs.Count == 0 || itemSpawnPoints == null || itemSpawnPoints.Length == 0)
+        if (consumablePrefabs != null)
+        {
+            consumablePrefabs.RemoveAll(prefab => prefab == null);
+        }
+
+        List<Transform> availablePoints = new List<Transform>();
+        if (itemSpawnPoints != null)
+        {
+            foreach (Transform point in itemSpawnPoints)
+            {
+                if (point != null) availablePoints.Add(point);
+            }
+        }
+
+        if (consumablePrefabs == null || consumablePrefabs.Count == 0 || availablePoints.Count == 0)
             return;
 
-        // Limpiamos la lista por si acaso quedó algo de la ronda anterior
         ClearActiveItems();
 
-        List<Transform> availablePoints = new List<Transform>(itemSpawnPoints);
         int spawnCount = Mathf.Min(itemsToSpawnPerWave, availablePoints.Count);
 
         for (int i = 0; i < spawnCount; i++)
         {
             int randomIndexPoint = Random.Range(0, availablePoints.Count);
             Transform spawnPoint = availablePoints[randomIndexPoint];
-            availablePoints.RemoveAt(randomIndexPoint); // Evita duplicar objetos en el mismo punto
+            availablePoints.RemoveAt(randomIndexPoint);
 
             GameObject randomPrefab = consumablePrefabs[Random.Range(0, consumablePrefabs.Count)];
             GameObject itemInstance = Instantiate(randomPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -221,6 +248,61 @@ public class WaveSpawner : MonoBehaviour
             }
         }
         activeItems.Clear();
+    }
+
+    // --- MÉTODOS PARA PÁGINAS DE CÓDICE ---
+
+    private void TrySpawnCodexPage()
+    {
+        // Filtramos puntos de spawn de códice válidos
+        List<Transform> availableCodexPoints = new List<Transform>();
+        if (codexSpawnPoints != null)
+        {
+            foreach (Transform point in codexSpawnPoints)
+            {
+                if (point != null) availableCodexPoints.Add(point);
+            }
+        }
+
+        // Comprobación inicial de vacíos
+        if (remainingCodexPages == null || remainingCodexPages.Count == 0 || availableCodexPoints.Count == 0)
+            return;
+
+        // Limpiamos la página anterior si seguía en la escena
+        if (activeCodexInstance != null)
+        {
+            Destroy(activeCodexInstance);
+        }
+
+        // --- CÁLCULO DE PROBABILIDAD DE APARICIÓN ---
+        int wavesRemaining = waves.Count - currentWaveIndex; // Ejemplo: 13 oleadas en total - ronda actual
+        int pagesRemaining = remainingCodexPages.Count;      // Cuántas páginas faltan por salir
+
+        bool shouldSpawn = false;
+
+        if (wavesRemaining <= pagesRemaining)
+        {
+            // OBLIGATORIO: Si quedan las mismas (o menos) oleadas que páginas, DEBE aparecer sí o sí
+            shouldSpawn = true;
+        }
+        else
+        {
+            // ALEATORIO: Calculamos la probabilidad según las rondas disponibles (ej. 6 páginas / 13 rondas = ~46% de chance)
+            float spawnChance = (float)pagesRemaining / wavesRemaining;
+            shouldSpawn = Random.value <= spawnChance;
+        }
+
+        // Si la evaluación dio positiva, instanciamos una página
+        if (shouldSpawn)
+        {
+            Transform randomSpawnPoint = availableCodexPoints[Random.Range(0, availableCodexPoints.Count)];
+
+            int randomIndex = Random.Range(0, remainingCodexPages.Count);
+            GameObject pageToSpawnPrefab = remainingCodexPages[randomIndex];
+
+            activeCodexInstance = Instantiate(pageToSpawnPrefab, randomSpawnPoint.position, randomSpawnPoint.rotation);
+            remainingCodexPages.RemoveAt(randomIndex); // Se borra de la lista para no repetirse
+        }
     }
 
     private List<GameObject> BuildEnemyList(WaveData wave)
