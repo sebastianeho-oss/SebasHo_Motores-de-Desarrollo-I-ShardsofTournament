@@ -37,6 +37,7 @@ public class WaveSpawner : MonoBehaviour
     private bool isCountingDown = false;
 
     private float activeWaveRemainingTime = 0f;
+    private float currentWaveTotalDuration = 0f; // <--- Duración total de la oleada activa
     private bool isWaveActive = false;
 
     private PlayerInputActions inputActions;
@@ -49,6 +50,7 @@ public class WaveSpawner : MonoBehaviour
     public float WaveTimer => waveTimer;
     public bool IsCountingDown => isCountingDown;
     public float ActiveWaveRemainingTime => activeWaveRemainingTime;
+    public float CurrentWaveTotalDuration => currentWaveTotalDuration; // <--- Propiedad pública expuesta
     public bool IsWaveActive => isWaveActive;
 
     private void Awake()
@@ -137,7 +139,7 @@ public class WaveSpawner : MonoBehaviour
 
         SpawnShopPod();
         SpawnConsumableItems();
-        TrySpawnCodexPage(); // Evaluará dinámicamente si debe soltar una página en esta ronda
+        TrySpawnCodexPage();
 
         while (waveTimer > 0)
         {
@@ -151,6 +153,7 @@ public class WaveSpawner : MonoBehaviour
         // --- FASE DE COMBATE ---
         isWaveActive = true;
         activeWaveRemainingTime = currentWave.waveDuration;
+        currentWaveTotalDuration = currentWave.waveDuration; // <--- Guardamos la duración total de esta oleada
 
         List<GameObject> enemiesToSpawn = BuildEnemyList(currentWave);
         totalEnemiesInCurrentWave = enemiesToSpawn.Count;
@@ -200,8 +203,6 @@ public class WaveSpawner : MonoBehaviour
         }
     }
 
-    // --- MÉTODOS PARA OBJETOS CONSUMIBLES ---
-
     private void SpawnConsumableItems()
     {
         if (consumablePrefabs != null)
@@ -250,11 +251,8 @@ public class WaveSpawner : MonoBehaviour
         activeItems.Clear();
     }
 
-    // --- MÉTODOS PARA PÁGINAS DE CÓDICE ---
-
     private void TrySpawnCodexPage()
     {
-        // Filtramos puntos de spawn de códice válidos
         List<Transform> availableCodexPoints = new List<Transform>();
         if (codexSpawnPoints != null)
         {
@@ -264,35 +262,29 @@ public class WaveSpawner : MonoBehaviour
             }
         }
 
-        // Comprobación inicial de vacíos
         if (remainingCodexPages == null || remainingCodexPages.Count == 0 || availableCodexPoints.Count == 0)
             return;
 
-        // Limpiamos la página anterior si seguía en la escena
         if (activeCodexInstance != null)
         {
             Destroy(activeCodexInstance);
         }
 
-        // --- CÁLCULO DE PROBABILIDAD DE APARICIÓN ---
-        int wavesRemaining = waves.Count - currentWaveIndex; // Ejemplo: 13 oleadas en total - ronda actual
-        int pagesRemaining = remainingCodexPages.Count;      // Cuántas páginas faltan por salir
+        int wavesRemaining = waves.Count - currentWaveIndex;
+        int pagesRemaining = remainingCodexPages.Count;
 
         bool shouldSpawn = false;
 
         if (wavesRemaining <= pagesRemaining)
         {
-            // OBLIGATORIO: Si quedan las mismas (o menos) oleadas que páginas, DEBE aparecer sí o sí
             shouldSpawn = true;
         }
         else
         {
-            // ALEATORIO: Calculamos la probabilidad según las rondas disponibles (ej. 6 páginas / 13 rondas = ~46% de chance)
             float spawnChance = (float)pagesRemaining / wavesRemaining;
             shouldSpawn = Random.value <= spawnChance;
         }
 
-        // Si la evaluación dio positiva, instanciamos una página
         if (shouldSpawn)
         {
             Transform randomSpawnPoint = availableCodexPoints[Random.Range(0, availableCodexPoints.Count)];
@@ -301,7 +293,7 @@ public class WaveSpawner : MonoBehaviour
             GameObject pageToSpawnPrefab = remainingCodexPages[randomIndex];
 
             activeCodexInstance = Instantiate(pageToSpawnPrefab, randomSpawnPoint.position, randomSpawnPoint.rotation);
-            remainingCodexPages.RemoveAt(randomIndex); // Se borra de la lista para no repetirse
+            remainingCodexPages.RemoveAt(randomIndex);
         }
     }
 
@@ -317,7 +309,6 @@ public class WaveSpawner : MonoBehaviour
             }
         }
 
-        // Mezclar aleatoriamente el orden de los enemigos
         for (int i = 0; i < list.Count; i++)
         {
             GameObject temp = list[i];
@@ -341,7 +332,7 @@ public class WaveSpawner : MonoBehaviour
 
         if (activeEnemiesCount <= 0 && !isSpawning)
         {
-            isWaveActive = false; // Desactiva la cuenta regresiva antes de que llegue a 0
+            isWaveActive = false;
 
             Debug.Log("¡Ola " + (currentWaveIndex + 1) + " completada!");
 

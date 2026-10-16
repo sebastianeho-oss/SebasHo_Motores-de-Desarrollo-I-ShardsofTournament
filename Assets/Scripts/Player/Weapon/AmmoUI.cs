@@ -51,12 +51,12 @@ public class AmmoUI : MonoBehaviour
 
                 if (activeAmmo.IsReloading)
                 {
-                    ammoText.text = "RECARGANDO...";
+                    ammoText.text = "RECARGANDO";
                     ammoText.color = reloadingColor;
                 }
                 else if (currentInMag == 0 && reserve == 0)
                 {
-                    ammoText.text = "SIN MUNICIÓN";
+                    ammoText.text = "SIN MUNICION";
                     ammoText.color = emptyColor;
                 }
                 else

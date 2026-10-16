@@ -52,7 +52,7 @@ public class CoinUI : MonoBehaviour
     {
         if (totalCoinsText != null && shopManager != null)
         {
-            totalCoinsText.text = "Monedas: " + shopManager.Coins;
+            totalCoinsText.text = "$" + shopManager.Coins;
         }
     }
 

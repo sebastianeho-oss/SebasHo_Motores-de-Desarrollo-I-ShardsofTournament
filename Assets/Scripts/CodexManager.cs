@@ -8,14 +8,19 @@ public class CodexManager : MonoBehaviour
     public static CodexManager Instance;
 
     [Header("UI References (Arrastra aquí tus elementos de UI)")]
-    public GameObject codexPanel;       // El Panel único general con la imagen y el texto
-    public TMP_Text textComponent;      // El componente de texto (TextMeshPro)
-    public Button closeButton;          // El botón único de "Salir" o "Cerrar"
+    public GameObject codexPanel;
+    public TMP_Text textComponent;
+    public Button closeButton;
+
+    [Header("HUD Counter Reference")]
+    [Tooltip("Arrastra aquí el componente de texto del HUD que mostrará el contador (ej. 'Páginas: 0 / 6')")]
+    public TMP_Text counterHUDText;
 
     [Header("Pages Text List")]
-    [Tooltip("Escribe aquí el texto de cada página. Element 0 = Página 1, Element 1 = Página 2, etc.")]
     [TextArea(5, 15)]
     public List<string> pageTexts = new List<string>();
+
+    private int collectedPagesCount = 0;
 
     private void Awake()
     {
@@ -31,6 +36,27 @@ public class CodexManager : MonoBehaviour
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(CloseCodex);
+        }
+
+        // Actualizar el contador al iniciar el juego
+        UpdateHUDCounter();
+    }
+
+    /// <summary>
+    /// Incrementa el contador de páginas recogidas y actualiza el HUD.
+    /// </summary>
+    public void PageCollected()
+    {
+        collectedPagesCount++;
+        UpdateHUDCounter();
+    }
+
+    private void UpdateHUDCounter()
+    {
+        if (counterHUDText != null)
+        {
+            int totalPages = pageTexts != null ? pageTexts.Count : 0;
+            counterHUDText.text = $"Paginas: {collectedPagesCount} / {totalPages}";
         }
     }
 
@@ -48,7 +74,6 @@ public class CodexManager : MonoBehaviour
             codexPanel.SetActive(true);
         }
 
-        // Delega la pausa, la ocultación del HUD y la liberación del cursor al GameManager
         if (FindAnyObjectByType<GameManager>() != null)
         {
             FindAnyObjectByType<GameManager>().OpenCodexGame();
@@ -62,7 +87,6 @@ public class CodexManager : MonoBehaviour
             codexPanel.SetActive(false);
         }
 
-        // Delega la reanudación del juego y el bloqueo del cursor al GameManager
         if (FindAnyObjectByType<GameManager>() != null)
         {
             FindAnyObjectByType<GameManager>().CloseCodexGame();

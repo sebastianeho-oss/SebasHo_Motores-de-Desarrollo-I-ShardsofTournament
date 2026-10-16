@@ -7,15 +7,19 @@ public class PlayerHealth : MonoBehaviour
     public float currentHealth;
 
     [Header("Mitigación por Vida Baja")]
-    [SerializeField] private float lowHealthThreshold = 25f; // Umbral de activación (25 puntos)
-    [SerializeField] private float damageReductionMultiplier = 0.10f; // Multiplicador (10% del daño entra, es decir, se reduce un 90%)
+    [SerializeField] private float lowHealthThreshold = 25f;
+    [SerializeField] private float damageReductionMultiplier = 0.10f;
 
     [Header("Estados y Permisos")]
-    public bool isInvincible = false; // Interruptor de invencibilidad
+    public bool isInvincible = false;
     public bool isDead = false;
 
     [Header("Referencias")]
     public GameManager gameManager;
+
+    [Header("Efecto de Cámara")]
+    [Tooltip("Arrastra aquí tu controlador de cámaras de Cinemachine (se auto-asigna si está en la escena).")]
+    public CinemachineStateController cinemachineController;
 
     void Start()
     {
@@ -25,14 +29,17 @@ public class PlayerHealth : MonoBehaviour
         {
             gameManager = FindAnyObjectByType<GameManager>();
         }
+
+        if (cinemachineController == null)
+        {
+            cinemachineController = FindAnyObjectByType<CinemachineStateController>();
+        }
     }
 
     public void TakeDamage(float amount)
     {
-        // Si el jugador está muerto o la invencibilidad está activa, ignorar el daño
         if (isDead || isInvincible) return;
 
-        // Comprobamos si la salud actual es menor o igual al umbral (25 puntos)
         float finalDamage = amount;
         if (currentHealth <= lowHealthThreshold)
         {
@@ -44,6 +51,12 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
         Debug.Log($"Jugador recibió {finalDamage} de daño. Salud actual: {currentHealth}");
+
+        // --- DISPARAR LA SACUDIDA DE CÁMARA ---
+        if (cinemachineController != null)
+        {
+            cinemachineController.TriggerCameraShake();
+        }
 
         if (currentHealth <= 0f)
         {

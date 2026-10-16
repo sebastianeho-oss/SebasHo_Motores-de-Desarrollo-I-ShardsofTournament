@@ -1,12 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Cinemachine;
-using UnityEngine.InputSystem;
 
 public class CinemachineStateController : MonoBehaviour
 {
     public enum AimCameraType { Standard, Sniper }
 
-    [Header("Referencias de C�maras Cinemachine")]
+    [Header("Referencias de Cámaras Cinemachine")]
     public CinemachineCamera followCamera;
     public CinemachineCamera aimCamera;
     public CinemachineCamera sniperAimCamera;
@@ -18,12 +17,15 @@ public class CinemachineStateController : MonoBehaviour
     public int activePriority = 20;
     public int inactivePriority = 0;
 
-    [Header("Rotaci�n y Sensibilidad")]
+    [Header("Rotación y Sensibilidad")]
     public Transform playerTarget;
     public float mouseSensitivity = 2.0f;
     public float aimSensitivityMultiplier = 0.5f;
     public float minYAngle = -35.0f;
     public float maxYAngle = 60.0f;
+
+    [Header("Efecto de Sacudida (Impulse)")]
+    public CinemachineImpulseSource impulseSource;
 
     public PlayerHealth playerHealth;
 
@@ -82,6 +84,16 @@ public class CinemachineStateController : MonoBehaviour
             playerHealth = playerTarget.GetComponent<PlayerHealth>();
         }
 
+        // Obtiene o autogenera el componente de impulso en este mismo objeto
+        if (impulseSource == null)
+        {
+            impulseSource = GetComponent<CinemachineImpulseSource>();
+            if (impulseSource == null)
+            {
+                impulseSource = gameObject.AddComponent<CinemachineImpulseSource>();
+            }
+        }
+
         ResetAllAimCameras();
         if (followCamera != null) followCamera.Priority = activePriority;
     }
@@ -102,7 +114,7 @@ public class CinemachineStateController : MonoBehaviour
         UpdateCameraPriorities();
 
         float currentSensitivity = IsAiming ? (mouseSensitivity * aimSensitivityMultiplier) : mouseSensitivity;
-               
+
         currentX += lookInput.x * currentSensitivity * Time.deltaTime * 60f;
         currentY -= lookInput.y * currentSensitivity * Time.deltaTime * 60f;
         currentY = Mathf.Clamp(currentY, minYAngle, maxYAngle);
@@ -144,5 +156,15 @@ public class CinemachineStateController : MonoBehaviour
         currentX += recoilX;
         currentY -= recoilY;
         currentY = Mathf.Clamp(currentY, minYAngle, maxYAngle);
+    }
+
+    // --- MÉTODO DE INSTANCIA VÁLIDO PARA CINEMACHINE 3.x ---
+    public void TriggerCameraShake()
+    {
+        if (impulseSource != null)
+        {
+            // Llama al método de instancia correctamente
+            impulseSource.GenerateImpulse(Vector3.one * 1.5f);
+        }
     }
 }
