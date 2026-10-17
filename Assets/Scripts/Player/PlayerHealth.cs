@@ -17,6 +17,9 @@ public class PlayerHealth : MonoBehaviour
     [Header("Referencias")]
     public GameManager gameManager;
 
+    [Header("Referencias de UI")]
+    public HealthUI healthUI;
+
     [Header("Efecto de Cámara")]
     [Tooltip("Arrastra aquí tu controlador de cámaras de Cinemachine (se auto-asigna si está en la escena).")]
     public CinemachineStateController cinemachineController;
@@ -33,6 +36,11 @@ public class PlayerHealth : MonoBehaviour
         if (cinemachineController == null)
         {
             cinemachineController = FindAnyObjectByType<CinemachineStateController>();
+        }
+
+        if (healthUI == null)
+        {
+            healthUI = FindAnyObjectByType<HealthUI>();
         }
     }
 
@@ -56,6 +64,12 @@ public class PlayerHealth : MonoBehaviour
         if (cinemachineController != null)
         {
             cinemachineController.TriggerCameraShake();
+        }
+
+        // --- DISPARAR EL EFECTO VISUAL DE DAÑO EN UI (PANEL ROJO) ---
+        if (healthUI != null)
+        {
+            healthUI.TriggerDamageFlash();
         }
 
         if (currentHealth <= 0f)

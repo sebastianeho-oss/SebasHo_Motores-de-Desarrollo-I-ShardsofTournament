@@ -1,24 +1,30 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections; // Necesario para las Corrutinas
 
 public class HealthUI : MonoBehaviour
 {
     [Header("Referencias UI")]
-    public Image healthFillImage;        // Imagen con Image Type: Filled[cite: 4]
-    public TextMeshProUGUI healthText;   // Texto de la cifra (TMP)[cite: 4]
+    public Image healthFillImage;        // Imagen con Image Type: Filled
+    public TextMeshProUGUI healthText;   // Texto de la cifra (TMP)
 
-    [Header("Panel de Alerta de Vida Baja")]
-    public GameObject lowHealthPanel;    // Arrastra aquí el Panel rojo transparente
+    [Header("Panel de Alerta de Vida Baja (Permanente)")]
+    public GameObject lowHealthPanel;    // Panel rojo para cuando estás bajo de vida
+
+    [Header("Efecto de Daño (Flash Rojo)")]
+    public Image damageFlashImage;       // Imagen UI en pantalla completa que parpadea al recibir daño
+    public float flashDuration = 0.25f;  // Cuánto dura el destello en pantalla
+    private Coroutine flashCoroutine;
 
     [Header("Referencia del Jugador")]
-    public PlayerHealth playerHealth;    // Script PlayerHealth del personaje[cite: 4]
+    public PlayerHealth playerHealth;    // Script PlayerHealth del personaje
 
     [Header("Efecto Visual de la Barra")]
-    public float fillSpeed = 5f;         // Velocidad de suavizado de la barra[cite: 4]
+    public float fillSpeed = 5f;         // Velocidad de suavizado de la barra
 
     [Tooltip("Gradiente original para la barra de vida.")]
-    public Gradient healthGradient;      // Gradiente configurable desde el Inspector[cite: 4]
+    public Gradient healthGradient;      // Gradiente configurable desde el Inspector
 
     [Header("Configuración de Color del Texto (Current)")]
     [SerializeField] private float alertThreshold = 25f;          // Umbral crítico (<= 25)
@@ -39,10 +45,17 @@ public class HealthUI : MonoBehaviour
             }
         }
 
-        // Asegurarse de que el panel comience apagado si la vida es mayor a 25
+        // Asegurarse de que los paneles comiencen apagados / transparentes
         if (lowHealthPanel != null)
         {
             lowHealthPanel.SetActive(false);
+        }
+
+        if (damageFlashImage != null)
+        {
+            Color col = damageFlashImage.color;
+            col.a = 0f;
+            damageFlashImage.color = col;
         }
     }
 
@@ -71,19 +84,19 @@ public class HealthUI : MonoBehaviour
 
             healthText.text = $"{currentHP} / {maxHP}";
 
-            // Lógica de colores exclusiva para el número actual y activación del Panel
+            // Lógica de colores exclusiva para el número actual y activación del Panel de vida baja
             if (playerHealth.currentHealth <= alertThreshold)
             {
                 healthText.color = alertTextColor; // Rojo cuando es <= 25
 
                 if (lowHealthPanel != null && !lowHealthPanel.activeSelf)
                 {
-                    lowHealthPanel.SetActive(true); // Activa el panel rojo transparente
+                    lowHealthPanel.SetActive(true); // Activa el panel rojo permanente de vida baja
                 }
             }
             else
             {
-                // Si la salud vuelve a subir (por curación), apagamos el panel de alerta
+                // Si la salud vuelve a subir (por curación), apagamos el panel de vida baja
                 if (lowHealthPanel != null && lowHealthPanel.activeSelf)
                 {
                     lowHealthPanel.SetActive(false);
@@ -99,5 +112,46 @@ public class HealthUI : MonoBehaviour
                 }
             }
         }
+    }
+
+    // Método público para disparar el destello rojo (llamado desde PlayerHealth)
+    public void TriggerDamageFlash()
+    {
+        if (damageFlashImage != null)
+        {
+            if (flashCoroutine != null)
+            {
+                StopCoroutine(flashCoroutine);
+            }
+            flashCoroutine = StartCoroutine(DamageFlashRoutine());
+        }
+    }
+
+    private IEnumerator DamageFlashRoutine()
+    {
+        // Pone la imagen totalmente roja y opaca de golpe
+        Color startColor = damageFlashImage.color;
+        startColor.a = 0.6f; // Ajusta este valor (0 a 1) para cambiar qué tan intenso es el rojo
+        damageFlashImage.color = startColor;
+
+        float elapsed = 0f;
+
+        // Hace un desvanecimiento (Fade Out) suave hasta que desaparezca
+        while (elapsed < flashDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(0.6f, 0f, elapsed / flashDuration);
+
+            Color currentColor = damageFlashImage.color;
+            currentColor.a = alpha;
+            damageFlashImage.color = currentColor;
+
+            yield return null;
+        }
+
+        // Asegurar que quede completamente transparente al terminar
+        Color endColor = damageFlashImage.color;
+        endColor.a = 0f;
+        damageFlashImage.color = endColor;
     }
 }
