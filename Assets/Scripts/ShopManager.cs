@@ -17,6 +17,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private GameObject mainShopButtons;
     [SerializeField] private GameObject attributesSectionPanel;
     [SerializeField] private GameObject passiveSectionPanel;
+    [SerializeField] private GameObject resupplySectionPanel; // Nuevo panel de reabastecimiento
 
     [Header("Textos UI General")]
     [SerializeField] private TextMeshProUGUI coinsText;
@@ -40,6 +41,8 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private MovementPlayerController playerMovement;
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private PlayerShield playerShield;
+    [SerializeField] private PlayerAmmoInventory ammoInventory; // Inventario de munición
+    [SerializeField] private WeaponSwitcher weaponSwitcher; // Selector de armas activas
 
     [Header("Límites y Niveles (Máximo 3)")]
     [SerializeField] private int maxSpeedLevel = 3;
@@ -98,7 +101,14 @@ public class ShopManager : MonoBehaviour
         if (shopPanel != null) shopPanel.SetActive(false);
         if (attributesSectionPanel != null) attributesSectionPanel.SetActive(false);
         if (passiveSectionPanel != null) passiveSectionPanel.SetActive(false);
+        if (resupplySectionPanel != null) resupplySectionPanel.SetActive(false);
         if (mainShopButtons != null) mainShopButtons.SetActive(true);
+
+        // Auto-asignación de referencias si no se arrastraron en el Inspector
+        if (playerHealth == null) playerHealth = FindAnyObjectByType<PlayerHealth>();
+        if (playerShield == null) playerShield = FindAnyObjectByType<PlayerShield>();
+        if (ammoInventory == null) ammoInventory = FindAnyObjectByType<PlayerAmmoInventory>();
+        if (weaponSwitcher == null) weaponSwitcher = FindAnyObjectByType<WeaponSwitcher>();
 
         UpdateShopUI();
     }
@@ -271,6 +281,7 @@ public class ShopManager : MonoBehaviour
         if (mainShopButtons != null) mainShopButtons.SetActive(true);
         if (attributesSectionPanel != null) attributesSectionPanel.SetActive(false);
         if (passiveSectionPanel != null) passiveSectionPanel.SetActive(false);
+        if (resupplySectionPanel != null) resupplySectionPanel.SetActive(false);
     }
 
     public void OpenAttributesSection()
@@ -278,6 +289,7 @@ public class ShopManager : MonoBehaviour
         if (mainShopButtons != null) mainShopButtons.SetActive(false);
         if (attributesSectionPanel != null) attributesSectionPanel.SetActive(true);
         if (passiveSectionPanel != null) passiveSectionPanel.SetActive(false);
+        if (resupplySectionPanel != null) resupplySectionPanel.SetActive(false);
     }
 
     public void OpenPassiveSection()
@@ -285,6 +297,15 @@ public class ShopManager : MonoBehaviour
         if (mainShopButtons != null) mainShopButtons.SetActive(false);
         if (attributesSectionPanel != null) attributesSectionPanel.SetActive(false);
         if (passiveSectionPanel != null) passiveSectionPanel.SetActive(true);
+        if (resupplySectionPanel != null) resupplySectionPanel.SetActive(false);
+    }
+
+    public void OpenResupplySection()
+    {
+        if (mainShopButtons != null) mainShopButtons.SetActive(false);
+        if (attributesSectionPanel != null) attributesSectionPanel.SetActive(false);
+        if (passiveSectionPanel != null) passiveSectionPanel.SetActive(false);
+        if (resupplySectionPanel != null) resupplySectionPanel.SetActive(true);
     }
 
     #endregion
@@ -303,7 +324,6 @@ public class ShopManager : MonoBehaviour
 
         if (playerMovement != null)
         {
-            // Incrementa la velocidad de caminata y sprint un 30% (+30%) en cada compra
             playerMovement.walkSpeed *= 1.30f;
             playerMovement.sprintSpeed *= 1.30f;
         }
@@ -324,6 +344,7 @@ public class ShopManager : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.maxHealth += 10f;
+            playerHealth.Heal(10f);
         }
 
         UpdateShopUI();
@@ -342,9 +363,203 @@ public class ShopManager : MonoBehaviour
         if (playerShield != null)
         {
             playerShield.maxShield += 10f;
+            playerShield.RechargeShield(10f);
         }
 
         UpdateShopUI();
+    }
+
+    #endregion
+
+    #region Lógica de Reabastecimiento Flexible (Parcial o Total)
+
+    // --- BOTÓN 1: Reabastecer Salud Flexible ---
+    public void BuyResupplyHealth()
+    {
+        if (playerHealth == null) playerHealth = FindAnyObjectByType<PlayerHealth>();
+        if (playerHealth == null) return;
+
+        if (playerHealth.currentHealth >= playerHealth.maxHealth)
+        {
+            Debug.Log("La salud ya está llena.");
+            return;
+        }
+
+        if (coins <= 0)
+        {
+            Debug.Log("No tienes monedas.");
+            return;
+        }
+
+        float missingHealth = playerHealth.maxHealth - playerHealth.currentHealth;
+
+        // Costo ideal para rellenar todo lo que falta (1 moneda por cada 1% faltante)
+        int idealCost = Mathf.CeilToInt(100f * (missingHealth / playerHealth.maxHealth));
+
+        int coinsToSpend;
+        float healthRestored;
+
+        if (coins >= idealCost)
+        {
+            // Tiene suficientes monedas para rellenar al 100% lo que falta
+            coinsToSpend = idealCost;
+            healthRestored = missingHealth;
+        }
+        else
+        {
+            // No le alcanza para el 100%, gasta todas las monedas disponibles proporcionalmente
+            coinsToSpend = coins;
+            // Cada moneda equivale a un 1% del total máximo de salud que se puede recuperar
+            float healthPerCoin = playerHealth.maxHealth / 100f;
+            healthRestored = coinsToSpend * healthPerCoin;
+
+            // Asegurar que no cure más de lo que realmente falta
+            if (healthRestored > missingHealth) healthRestored = missingHealth;
+        }
+
+        coins -= coinsToSpend;
+        playerHealth.Heal(healthRestored);
+
+        UpdateShopUI();
+        Debug.Log($"¡Salud reabastecida parcialmente! Se gastaron {coinsToSpend} monedas y se recuperaron {healthRestored} puntos de salud.");
+    }
+
+    // --- BOTÓN 2: Reabastecer Escudo Flexible ---
+    public void BuyResupplyShield()
+    {
+        if (playerShield == null) playerShield = FindAnyObjectByType<PlayerShield>();
+        if (playerShield == null) return;
+
+        if (playerShield.currentShield >= playerShield.maxShield)
+        {
+            Debug.Log("El escudo ya está lleno.");
+            return;
+        }
+
+        if (coins <= 0)
+        {
+            Debug.Log("No tienes monedas.");
+            return;
+        }
+
+        float missingShield = playerShield.maxShield - playerShield.currentShield;
+        int idealCost = Mathf.CeilToInt(100f * (missingShield / playerShield.maxShield));
+
+        int coinsToSpend;
+        float shieldRestored;
+
+        if (coins >= idealCost)
+        {
+            coinsToSpend = idealCost;
+            shieldRestored = missingShield;
+        }
+        else
+        {
+            coinsToSpend = coins;
+            float shieldPerCoin = playerShield.maxShield / 100f;
+            shieldRestored = coinsToSpend * shieldPerCoin;
+
+            if (shieldRestored > missingShield) shieldRestored = missingShield;
+        }
+
+        coins -= coinsToSpend;
+        playerShield.RechargeShield(shieldRestored);
+
+        UpdateShopUI();
+        Debug.Log($"¡Escudo reabastecido parcialmente! Se gastaron {coinsToSpend} monedas y se recuperaron {shieldRestored} puntos de escudo.");
+    }
+
+    // --- BOTÓN 3: Reabastecer Munición Flexible ---
+    public void BuyResupplyActiveWeaponAmmo()
+    {
+        if (weaponSwitcher == null) weaponSwitcher = FindAnyObjectByType<WeaponSwitcher>();
+        if (ammoInventory == null) ammoInventory = FindAnyObjectByType<PlayerAmmoInventory>();
+
+        if (weaponSwitcher == null || weaponSwitcher.selectedWeapon == -1)
+        {
+            Debug.Log("No hay ninguna arma activa seleccionada.");
+            return;
+        }
+
+        Transform activeWeaponTransform = weaponSwitcher.transform.GetChild(weaponSwitcher.selectedWeapon);
+        if (activeWeaponTransform == null || !activeWeaponTransform.gameObject.activeSelf)
+        {
+            Debug.Log("No se encontró el objeto del arma activa.");
+            return;
+        }
+
+        WeaponAmmo weaponAmmo = activeWeaponTransform.GetComponent<WeaponAmmo>();
+        if (weaponAmmo == null)
+        {
+            Debug.Log("El arma activa no tiene el componente WeaponAmmo.");
+            return;
+        }
+
+        AmmoType activeAmmoType = weaponAmmo.ammoType;
+
+        int currentMagazine = weaponAmmo.currentAmmo;
+        int maxMagazine = weaponAmmo.magazineSize;
+
+        int currentReserve = (ammoInventory != null) ? ammoInventory.GetReserveAmmo(activeAmmoType) : 0;
+        int maxReserve = (ammoInventory != null) ? ammoInventory.GetMaxReserveAmmo(activeAmmoType) : 0;
+
+        int totalCurrentAmmo = currentMagazine + currentReserve;
+        int totalMaxAmmo = maxMagazine + maxReserve;
+
+        if (totalCurrentAmmo >= totalMaxAmmo)
+        {
+            Debug.Log("La munición del arma activa ya está completamente al máximo.");
+            return;
+        }
+
+        if (coins <= 0)
+        {
+            Debug.Log("No tienes monedas.");
+            return;
+        }
+
+        int ammoNeeded = totalMaxAmmo - totalCurrentAmmo;
+        int idealCost = Mathf.CeilToInt(100f * ((float)ammoNeeded / totalMaxAmmo));
+
+        int coinsToSpend;
+        int ammoToRestore;
+
+        if (coins >= idealCost)
+        {
+            coinsToSpend = idealCost;
+            ammoToRestore = ammoNeeded;
+        }
+        else
+        {
+            coinsToSpend = coins;
+            // Cada moneda otorga un 1% del total máximo de munición combinada del arma
+            float ammoPerCoin = (float)totalMaxAmmo / 100f;
+            ammoToRestore = Mathf.FloorToInt(coinsToSpend * ammoPerCoin);
+
+            if (ammoToRestore < 1 && coinsToSpend > 0) ammoToRestore = 1; // Asegurar al menos 1 bala si gasta monedas
+            if (ammoToRestore > ammoNeeded) ammoToRestore = ammoNeeded;
+        }
+
+        coins -= coinsToSpend;
+
+        // Distribuir primero las balas al cargador actual hasta llenarlo, y el sobrante a la reserva
+        int spaceInMagazine = maxMagazine - currentMagazine;
+        if (ammoToRestore <= spaceInMagazine)
+        {
+            weaponAmmo.currentAmmo += ammoToRestore;
+        }
+        else
+        {
+            weaponAmmo.currentAmmo = maxMagazine;
+            int remainingAmmo = ammoToRestore - spaceInMagazine;
+            if (ammoInventory != null)
+            {
+                ammoInventory.AddAmmo(activeAmmoType, remainingAmmo);
+            }
+        }
+
+        UpdateShopUI();
+        Debug.Log($"¡Munición reabastecida parcialmente! Se gastaron {coinsToSpend} monedas y se añadieron {ammoToRestore} balas.");
     }
 
     #endregion
