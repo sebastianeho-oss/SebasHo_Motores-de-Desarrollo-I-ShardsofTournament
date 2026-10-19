@@ -5,7 +5,7 @@ using UnityEngine;
 public class WaveSpawner : MonoBehaviour
 {
     [SerializeField] private ShopManager shopManager;
-    [SerializeField] private GameManager gameManager; // Referencia para controlar el GameOver
+    [SerializeField] private GameManager gameManager;
 
     [Header("Configuración de Olas y Spawns")]
     [SerializeField] private List<WaveData> waves;
@@ -17,14 +17,14 @@ public class WaveSpawner : MonoBehaviour
     private GameObject activeShopPod;
 
     [Header("Configuración de Objetos Recogibles / Consumibles")]
-    [SerializeField] private List<GameObject> consumablePrefabs; // Lista de objetos que pueden aparecer
-    [SerializeField] private Transform[] itemSpawnPoints;        // Puntos específicos para los objetos
-    [SerializeField] private int itemsToSpawnPerWave = 3;        // Cantidad de objetos que aparecerán por ronda
-    private List<GameObject> activeItems = new List<GameObject>(); // Instancias activas en el mapa
+    [SerializeField] private List<GameObject> consumablePrefabs;
+    [SerializeField] private Transform[] itemSpawnPoints;
+    [SerializeField] private int itemsToSpawnPerWave = 3;
+    private List<GameObject> activeItems = new List<GameObject>();
 
     [Header("Configuración de Páginas de Códice")]
-    [SerializeField] private List<GameObject> codexPagesPrefabs; // Las 6 páginas de códice
-    [SerializeField] private Transform[] codexSpawnPoints;       // Puntos específicos donde pueden aparecer las páginas
+    [SerializeField] private List<GameObject> codexPagesPrefabs;
+    [SerializeField] private Transform[] codexSpawnPoints;
     private List<GameObject> remainingCodexPages = new List<GameObject>();
     private GameObject activeCodexInstance;
 
@@ -37,7 +37,7 @@ public class WaveSpawner : MonoBehaviour
     private bool isCountingDown = false;
 
     private float activeWaveRemainingTime = 0f;
-    private float currentWaveTotalDuration = 0f; // <--- Duración total de la oleada activa
+    private float currentWaveTotalDuration = 0f;
     private bool isWaveActive = false;
 
     private PlayerInputActions inputActions;
@@ -50,7 +50,7 @@ public class WaveSpawner : MonoBehaviour
     public float WaveTimer => waveTimer;
     public bool IsCountingDown => isCountingDown;
     public float ActiveWaveRemainingTime => activeWaveRemainingTime;
-    public float CurrentWaveTotalDuration => currentWaveTotalDuration; // <--- Propiedad pública expuesta
+    public float CurrentWaveTotalDuration => currentWaveTotalDuration;
     public bool IsWaveActive => isWaveActive;
 
     private void Awake()
@@ -91,7 +91,6 @@ public class WaveSpawner : MonoBehaviour
         {
             activeWaveRemainingTime -= Time.deltaTime;
 
-            // Al llegar a 0 se detiene la ronda y activa el GameOver
             if (activeWaveRemainingTime <= 0f)
             {
                 activeWaveRemainingTime = 0f;
@@ -111,7 +110,6 @@ public class WaveSpawner : MonoBehaviour
 
     public void SkipCountdown()
     {
-        // Omitir la espera antes de iniciar la oleada
         if (isCountingDown)
         {
             waveTimer = 0f;
@@ -125,7 +123,27 @@ public class WaveSpawner : MonoBehaviour
             Debug.Log("¡Felicidades! Has sobrevivido a todas las olas.");
             if (gameManager != null)
             {
-                gameManager.Win();
+                // Verificamos si se recolectaron todas las páginas del códice
+                bool collectedAllCodex = false;
+
+                if (CodexManager.Instance != null && codexPagesPrefabs != null && codexPagesPrefabs.Count > 0)
+                {
+                    int totalCodexCount = codexPagesPrefabs.Count;
+                    if (CodexManager.Instance.HasCollectedAllPages(totalCodexCount))
+                    {
+                        collectedAllCodex = true;
+                    }
+                }
+
+                // Llamada a la pantalla de victoria correspondiente
+                if (collectedAllCodex)
+                {
+                    gameManager.WinCodex();
+                }
+                else
+                {
+                    gameManager.Win();
+                }
             }
             yield break;
         }
@@ -153,7 +171,7 @@ public class WaveSpawner : MonoBehaviour
         // --- FASE DE COMBATE ---
         isWaveActive = true;
         activeWaveRemainingTime = currentWave.waveDuration;
-        currentWaveTotalDuration = currentWave.waveDuration; // <--- Guardamos la duración total de esta oleada
+        currentWaveTotalDuration = currentWave.waveDuration;
 
         List<GameObject> enemiesToSpawn = BuildEnemyList(currentWave);
         totalEnemiesInCurrentWave = enemiesToSpawn.Count;

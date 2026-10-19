@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public GameObject HUD;
     public GameObject gameOverUI;
     public GameObject winUI;
+    public GameObject winCodexUI; // <--- Segunda pantalla de victoria para el Códice completo
     public GameObject pauseUI;
     public GameObject shopUI;
 
@@ -35,6 +36,7 @@ public class GameManager : MonoBehaviour
 
         if (gameOverUI != null) gameOverUI.SetActive(false);
         if (winUI != null) winUI.SetActive(false);
+        if (winCodexUI != null) winCodexUI.SetActive(false);
         if (pauseUI != null) pauseUI.SetActive(false);
         if (HUD != null) HUD.SetActive(true);
     }
@@ -42,6 +44,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         bool isEndGameUIActive = (winUI != null && winUI.activeInHierarchy) ||
+                                 (winCodexUI != null && winCodexUI.activeInHierarchy) ||
                                  (gameOverUI != null && gameOverUI.activeInHierarchy);
 
         bool isShopUIActive = shopUI != null && shopUI.activeInHierarchy;
@@ -61,7 +64,8 @@ public class GameManager : MonoBehaviour
     private void OnPauseInput()
     {
         bool isEndGameUIActive = (winUI != null && winUI.activeInHierarchy) ||
-                                (gameOverUI != null && gameOverUI.activeInHierarchy);
+                                 (winCodexUI != null && winCodexUI.activeInHierarchy) ||
+                                 (gameOverUI != null && gameOverUI.activeInHierarchy);
 
         if (!isEndGameUIActive)
         {
@@ -121,6 +125,23 @@ public class GameManager : MonoBehaviour
     public void Win()
     {
         if (winUI != null) winUI.SetActive(true);
+        if (HUD != null) HUD.SetActive(false);
+        Time.timeScale = 0f;
+    }
+
+    // --- MÉTODOS PARA PANTALLA DE VICTORIA ESPECIAL ---
+    public void WinCodex()
+    {
+        if (winCodexUI != null)
+        {
+            winCodexUI.SetActive(true);
+        }
+        else if (winUI != null)
+        {
+            // Respaldar con la victoria normal si no asignaste el panel en el Inspector
+            winUI.SetActive(true);
+        }
+
         if (HUD != null) HUD.SetActive(false);
         Time.timeScale = 0f;
     }

@@ -22,6 +22,8 @@ public class CodexManager : MonoBehaviour
 
     private int collectedPagesCount = 0;
 
+    public int CollectedPagesCount => collectedPagesCount;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -38,7 +40,6 @@ public class CodexManager : MonoBehaviour
             closeButton.onClick.AddListener(CloseCodex);
         }
 
-        // Actualizar el contador al iniciar el juego
         UpdateHUDCounter();
     }
 
@@ -58,6 +59,11 @@ public class CodexManager : MonoBehaviour
             int totalPages = pageTexts != null ? pageTexts.Count : 0;
             counterHUDText.text = $"Paginas: {collectedPagesCount} / {totalPages}";
         }
+    }
+
+    public bool HasCollectedAllPages(int totalRequired)
+    {
+        return collectedPagesCount >= totalRequired;
     }
 
     public void OpenCodex(int pageIndex)
