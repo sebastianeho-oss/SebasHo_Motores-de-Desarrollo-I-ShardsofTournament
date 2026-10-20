@@ -28,6 +28,13 @@ public class WaveSpawner : MonoBehaviour
     private List<GameObject> remainingCodexPages = new List<GameObject>();
     private GameObject activeCodexInstance;
 
+    [Header("Configuración de Audio y Transiciones")]
+    [SerializeField] private AudioSource musicAudioSource;
+    [SerializeField] private AudioClip restMusic;
+    [SerializeField] private AudioClip battleMusic;
+    [SerializeField] private float musicFadeDuration = 1.0f;
+    private Coroutine fadeCoroutine;
+
     private int currentWaveIndex = 0;
     private int activeEnemiesCount = 0;
     private int totalEnemiesInCurrentWave = 0;
@@ -123,7 +130,6 @@ public class WaveSpawner : MonoBehaviour
             Debug.Log("¡Felicidades! Has sobrevivido a todas las olas.");
             if (gameManager != null)
             {
-                // Verificamos si se recolectaron todas las páginas del códice
                 bool collectedAllCodex = false;
 
                 if (CodexManager.Instance != null && codexPagesPrefabs != null && codexPagesPrefabs.Count > 0)
@@ -135,7 +141,6 @@ public class WaveSpawner : MonoBehaviour
                     }
                 }
 
-                // Llamada a la pantalla de victoria correspondiente
                 if (collectedAllCodex)
                 {
                     gameManager.WinCodex();
@@ -155,6 +160,9 @@ public class WaveSpawner : MonoBehaviour
         isCountingDown = true;
         isWaveActive = false;
 
+        // Reproducir música de descanso con fundido
+        PlayMusic(restMusic);
+
         SpawnShopPod();
         SpawnConsumableItems();
         TrySpawnCodexPage();
@@ -172,6 +180,9 @@ public class WaveSpawner : MonoBehaviour
         isWaveActive = true;
         activeWaveRemainingTime = currentWave.waveDuration;
         currentWaveTotalDuration = currentWave.waveDuration;
+
+        // Reproducir música de batalla con fundido
+        PlayMusic(battleMusic);
 
         List<GameObject> enemiesToSpawn = BuildEnemyList(currentWave);
         totalEnemiesInCurrentWave = enemiesToSpawn.Count;
@@ -197,6 +208,52 @@ public class WaveSpawner : MonoBehaviour
         }
 
         isSpawning = false;
+    }
+
+    private void PlayMusic(AudioClip newClip)
+    {
+        if (musicAudioSource != null && newClip != null)
+        {
+            if (musicAudioSource.clip == newClip && musicAudioSource.isPlaying)
+                return;
+
+            if (fadeCoroutine != null)
+            {
+                StopCoroutine(fadeCoroutine);
+            }
+
+            fadeCoroutine = StartCoroutine(FadeAndSwitchMusic(newClip, musicFadeDuration));
+        }
+    }
+
+    private IEnumerator FadeAndSwitchMusic(AudioClip newClip, float duration)
+    {
+        float startVolume = musicAudioSource.volume;
+
+        // 1. Fade Out: Baja el volumen de la pista actual gradualmente
+        float timer = 0f;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            musicAudioSource.volume = Mathf.Lerp(startVolume, 0f, timer / duration);
+            yield return null;
+        }
+
+        musicAudioSource.Stop();
+        musicAudioSource.clip = newClip;
+        musicAudioSource.Play();
+
+        // 2. Fade In: Sube el volumen de la nueva pista gradualmente
+        timer = 0f;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            musicAudioSource.volume = Mathf.Lerp(0f, startVolume, timer / duration);
+            yield return null;
+        }
+
+        musicAudioSource.volume = startVolume;
+        fadeCoroutine = null;
     }
 
     private void SpawnShopPod()

@@ -24,6 +24,9 @@ public class PlayerHealth : MonoBehaviour
     [Tooltip("Arrastra aquí tu controlador de cámaras de Cinemachine (se auto-asigna si está en la escena).")]
     public CinemachineStateController cinemachineController;
 
+    [Header("Referencias de Audio")]
+    public PlayerSoundController playerSoundController; // <-- Referencia al controlador de sonidos
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -42,6 +45,12 @@ public class PlayerHealth : MonoBehaviour
         {
             healthUI = FindAnyObjectByType<HealthUI>();
         }
+
+        // Auto-asignar el PlayerSoundController si está en el mismo objeto
+        if (playerSoundController == null)
+        {
+            playerSoundController = GetComponent<PlayerSoundController>();
+        }
     }
 
     public void TakeDamage(float amount)
@@ -59,6 +68,12 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
         Debug.Log($"Jugador recibió {finalDamage} de daño. Salud actual: {currentHealth}");
+
+        // --- REPRODUCIR SONIDO DE DAÑO ---
+        if (playerSoundController != null)
+        {
+            playerSoundController.playDamage();
+        }
 
         // --- DISPARAR LA SACUDIDA DE CÁMARA ---
         if (cinemachineController != null)
@@ -90,6 +105,14 @@ public class PlayerHealth : MonoBehaviour
     {
         isDead = true;
         Debug.Log("El jugador ha muerto.");
+
+        // --- REPRODUCIR SONIDO DE MUERTE ---
+        if (playerSoundController != null)
+        {
+            // Opcional: Si quieres cortar los pasos o sonidos de bucle al morir
+            playerSoundController.stopMove();
+            playerSoundController.playDeath();
+        }
 
         if (gameManager != null)
         {

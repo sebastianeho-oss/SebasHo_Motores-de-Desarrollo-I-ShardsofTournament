@@ -19,6 +19,7 @@ public class RocketLauncher : MonoBehaviour
 
     private float nextFireTime = 0f;
     private WeaponAmmo weaponAmmo;
+    private WeaponSoundController weaponSoundController; // <-- Referencia al sonido del lanzamisiles
     private PlayerInputActions inputActions;
 
     private void Awake()
@@ -42,11 +43,17 @@ public class RocketLauncher : MonoBehaviour
         {
             playerHealth = GetComponentInParent<PlayerHealth>();
         }
+
+        // Auto-asignar el controlador de sonido del lanzamisiles
+        weaponSoundController = GetComponent<WeaponSoundController>();
+        if (weaponSoundController == null)
+        {
+            weaponSoundController = GetComponentInChildren<WeaponSoundController>();
+        }
     }
 
     void Update()
     {
-        // 🔒 BLOQUEO: Si la tienda está abierta, cancela el disparo inmediatamente
         if ((ShopManager.Instance != null && ShopManager.Instance.IsShopOpen) ||
             !canShoot || (playerHealth != null && playerHealth.isDead) || GameManager.IsPaused)
         {
@@ -73,6 +80,12 @@ public class RocketLauncher : MonoBehaviour
     void ShootRocket()
     {
         if (mainCamera == null || firePoint == null) return;
+
+        // --- REPRODUCIR SONIDO DE LANZAMIENTO / EXPLOSIÓN ---
+        if (weaponSoundController != null)
+        {
+            weaponSoundController.PlayShootSound();
+        }
 
         Ray cameraRay = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         Vector3 targetPoint;

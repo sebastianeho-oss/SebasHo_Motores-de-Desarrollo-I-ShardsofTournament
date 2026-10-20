@@ -48,6 +48,7 @@ public class ShotgunShootingSystem : MonoBehaviour
 
     public WeaponRecoil weaponRecoil;
     private WeaponAmmo weaponAmmo;
+    private WeaponSoundController weaponSoundController; // <-- Referencia al sonido de la escopeta
     private PlayerInputActions inputActions;
 
     private void Awake()
@@ -64,6 +65,13 @@ public class ShotgunShootingSystem : MonoBehaviour
 
         weaponAmmo = GetComponent<WeaponAmmo>();
         if (playerHealth == null) playerHealth = GetComponentInParent<PlayerHealth>();
+
+        // Auto-asignar el controlador de sonido de la escopeta
+        weaponSoundController = GetComponent<WeaponSoundController>();
+        if (weaponSoundController == null)
+        {
+            weaponSoundController = GetComponentInChildren<WeaponSoundController>();
+        }
     }
 
     void Update()
@@ -93,6 +101,12 @@ public class ShotgunShootingSystem : MonoBehaviour
     private void ExecuteShotgunShot()
     {
         nextFireTime = Time.time + fireRate;
+
+        // --- REPRODUCIR SONIDO DE DISPARO DE LA ESCOPETA ---
+        if (weaponSoundController != null)
+        {
+            weaponSoundController.PlayShootSound();
+        }
 
         ShootPellets();
 
@@ -137,13 +151,8 @@ public class ShotgunShootingSystem : MonoBehaviour
 
                     if (enemyHealth != null)
                     {
-                        // 1. Calcular distancia del impacto desde el punto de disparo
                         float hitDistance = fireHit.distance;
-
-                        // 2. Calcular el factor de daño según la distancia (de 1.0f a minDamagePercent)
                         float distanceFactor = CalculateDamageFalloff(hitDistance);
-
-                        // 3. Daño final por perdigón
                         float finalPelletDamage = damagePerPellet * distanceFactor * damageMultiplier;
 
                         enemyHealth.TakeDamage(finalPelletDamage);
@@ -158,19 +167,17 @@ public class ShotgunShootingSystem : MonoBehaviour
         }
     }
 
-    // Calcula cuánto daño conserva el disparo según la distancia de recorrido
     private float CalculateDamageFalloff(float distance)
     {
         if (distance <= minDamageDistance)
         {
-            return 1.0f; // 100% de daño a corta distancia
+            return 1.0f;
         }
         else if (distance >= maxDamageDistance)
         {
-            return minDamagePercent; // Daño mínimo/pésimo a larga distancia
+            return minDamagePercent;
         }
 
-        // Interpolación lineal progresiva entre la distancia mínima y máxima
         float t = (distance - minDamageDistance) / (maxDamageDistance - minDamageDistance);
         return Mathf.Lerp(1.0f, minDamagePercent, t);
     }

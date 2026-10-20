@@ -54,10 +54,6 @@ public class MovementPlayerController : MonoBehaviour
     private PlayerInputActions inputActions;
     private Vector2 moveInput;
     private bool sprintHeld;
-    private float stepTimer = 0;
-    public float walkStepInterval = 0.5f;
-    public float sprintStepInterval = 0.3f;
-    public float crouchStepInterval = 0.7f;
 
     private void Awake()
     {
@@ -157,7 +153,7 @@ public class MovementPlayerController : MonoBehaviour
                         }
                         else if (ShopManager.Instance.currentPassive == PassiveType.Tank)
                         {
-                            currentSpeed *= 0.70f; // 30% más lento (se mueve al 70% de su velocidad)
+                            currentSpeed *= 0.70f; // 30% más lento
                         }
                     }
 
@@ -170,7 +166,7 @@ public class MovementPlayerController : MonoBehaviour
 
                     if (ShopManager.Instance != null && ShopManager.Instance.currentPassive == PassiveType.Tank)
                     {
-                        currentSpeed *= 0.70f; // 30% más lento en el aire
+                        currentSpeed *= 0.70f;
                     }
                 }
 
@@ -184,21 +180,20 @@ public class MovementPlayerController : MonoBehaviour
             controller.Move(velocity * Time.deltaTime);
         }
 
+        // Control del sonido de pasos en bucle
         if (IsMoving && isGrounded)
         {
-            stepTimer -= Time.deltaTime;
-
-            if (stepTimer <= 0f)
+            if (playerSoundController != null)
             {
-                if (playerSoundController != null) playerSoundController.playMove();
-                if (IsCrouching) stepTimer = crouchStepInterval;
-                else if (sprintHeld) stepTimer = sprintStepInterval;
-                else stepTimer = walkStepInterval;
+                playerSoundController.playMove();
             }
         }
         else
         {
-            stepTimer = 0f;
+            if (playerSoundController != null)
+            {
+                playerSoundController.stopMove();
+            }
         }
 
         if (animator != null)
@@ -233,11 +228,16 @@ public class MovementPlayerController : MonoBehaviour
             if (isAiming) horizontalAirSpeed *= aimSpeedMultiplier;
 
             IsCrouching = false;
-            if (playerSoundController != null) playerSoundController.playJump();
+
+            // Reproducir salto y cortar sonido de caminar al instante
+            if (playerSoundController != null)
+            {
+                playerSoundController.stopMove();
+                playerSoundController.playJump();
+            }
 
             float effectiveJumpHeight = jumpHeight;
 
-            // Pasiva Tanque: reduce drásticamente el salto
             if (ShopManager.Instance != null && ShopManager.Instance.currentPassive == PassiveType.Tank)
             {
                 effectiveJumpHeight *= 0.30f;

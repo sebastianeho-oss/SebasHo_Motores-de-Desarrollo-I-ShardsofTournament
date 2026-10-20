@@ -157,7 +157,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   speed: 35
   maxLifetime: 6
-  explosionPrefab: {fileID: 0}
+  explosionPrefab: {fileID: 1121192042590650, guid: e1b08032bec16ba4eb1ae23cbd572664, type: 3}
   explosionRadius: 6
   explosionForce: 800
   damage: 100

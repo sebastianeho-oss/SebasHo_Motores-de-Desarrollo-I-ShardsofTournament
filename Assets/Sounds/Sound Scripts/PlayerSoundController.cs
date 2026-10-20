@@ -1,8 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerSoundController : MonoBehaviour
 {
-    public AudioSource audioSource;
+    public AudioSource audioSource;             // Para sonidos cortos (salto, daño, muerte)
+    public AudioSource footstepsAudioSource;    // AudioSource exclusivo para los pasos
     public AudioClip jumpSound;
     public AudioClip moveSound;
     public AudioClip takingDamageSound;
@@ -10,21 +11,46 @@ public class PlayerSoundController : MonoBehaviour
 
     public void playJump()
     {
-        audioSource.PlayOneShot(jumpSound);
+        if (audioSource != null && jumpSound != null)
+        {
+            audioSource.PlayOneShot(jumpSound);
+        }
     }
 
     public void playMove()
     {
-        audioSource.PlayOneShot(moveSound);
+        if (footstepsAudioSource != null && moveSound != null)
+        {
+            if (!footstepsAudioSource.isPlaying)
+            {
+                footstepsAudioSource.clip = moveSound;
+                footstepsAudioSource.loop = true;
+                footstepsAudioSource.Play();
+            }
+        }
+    }
+
+    public void stopMove()
+    {
+        if (footstepsAudioSource != null && footstepsAudioSource.isPlaying)
+        {
+            footstepsAudioSource.Stop();
+        }
     }
 
     public void playDamage()
     {
-        audioSource.PlayOneShot(takingDamageSound);
+        if (audioSource != null && takingDamageSound != null)
+        {
+            audioSource.PlayOneShot(takingDamageSound);
+        }
     }
 
     public void playDeath()
     {
-        audioSource.PlayOneShot(deathSound);
+        if (audioSource != null && deathSound != null)
+        {
+            audioSource.PlayOneShot(deathSound);
+        }
     }
 }

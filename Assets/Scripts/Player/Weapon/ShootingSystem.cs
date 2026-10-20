@@ -33,6 +33,7 @@ public class ShootingSystem : MonoBehaviour
 
     public WeaponRecoil weaponRecoil;
     private WeaponAmmo weaponAmmo;
+    private WeaponSoundController weaponSoundController; // <-- Referencia al sonido del arma
     private PlayerInputActions inputActions;
 
     private void Awake()
@@ -50,6 +51,13 @@ public class ShootingSystem : MonoBehaviour
 
         weaponAmmo = GetComponent<WeaponAmmo>();
         if (playerHealth == null) playerHealth = GetComponentInParent<PlayerHealth>();
+
+        // Auto-asignar el controlador de sonido del arma
+        weaponSoundController = GetComponent<WeaponSoundController>();
+        if (weaponSoundController == null)
+        {
+            weaponSoundController = GetComponentInChildren<WeaponSoundController>();
+        }
     }
 
     void Update()
@@ -121,6 +129,12 @@ public class ShootingSystem : MonoBehaviour
     {
         if (mainCamera == null || firePoint == null) return;
 
+        // --- REPRODUCIR SONIDO DE DISPARO ---
+        if (weaponSoundController != null)
+        {
+            weaponSoundController.PlayShootSound();
+        }
+
         Ray cameraRay = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         Vector3 targetPoint;
         bool hasCameraHit = Physics.Raycast(cameraRay, out RaycastHit cameraHit, maxShootDistance, shootableMask);
@@ -153,7 +167,6 @@ public class ShootingSystem : MonoBehaviour
 
             if (enemyHealth != null)
             {
-                // Multiplicador de daño según las cargas acumuladas del Tanque
                 float finalDamage = damage;
                 if (ShopManager.Instance != null)
                 {

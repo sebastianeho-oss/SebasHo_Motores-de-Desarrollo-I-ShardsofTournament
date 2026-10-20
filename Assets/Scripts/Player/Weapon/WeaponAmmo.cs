@@ -19,6 +19,7 @@ public class WeaponAmmo : MonoBehaviour
     [Header("Referencias")]
     public PlayerHealth playerHealth;
     private PlayerAmmoInventory playerInventory;
+    private WeaponSoundController weaponSoundController; // <-- Referencia al sonido del arma
     private PlayerInputActions inputActions;
 
     public bool IsReloading => isReloading;
@@ -45,6 +46,13 @@ public class WeaponAmmo : MonoBehaviour
         {
             playerHealth = GetComponentInParent<PlayerHealth>();
         }
+
+        // Auto-asignar el WeaponSoundController del arma
+        weaponSoundController = GetComponent<WeaponSoundController>();
+        if (weaponSoundController == null)
+        {
+            weaponSoundController = GetComponentInChildren<WeaponSoundController>();
+        }
     }
 
     void Update()
@@ -63,6 +71,16 @@ public class WeaponAmmo : MonoBehaviour
     public bool CanShoot()
     {
         bool isAlive = (playerHealth == null || !playerHealth.isDead);
+
+        // Si intenta disparar sin munición, podemos reproducir el sonido de clic vacío
+        if (!isReloading && currentAmmo <= 0 && isAlive && !GameManager.IsPaused)
+        {
+            if (weaponSoundController != null)
+            {
+                weaponSoundController.PlayEmptyClickSound();
+            }
+        }
+
         return !isReloading && currentAmmo > 0 && isAlive && !GameManager.IsPaused;
     }
 
@@ -102,6 +120,12 @@ public class WeaponAmmo : MonoBehaviour
     {
         isReloading = true;
         Debug.Log($"Recargando {ammoType}...");
+
+        // --- REPRODUCIR SONIDO DE RECARGA ---
+        if (weaponSoundController != null)
+        {
+            weaponSoundController.PlayReloadSound();
+        }
 
         yield return new WaitForSeconds(reloadTime);
 
