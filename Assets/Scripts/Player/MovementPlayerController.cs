@@ -30,7 +30,6 @@ public class MovementPlayerController : MonoBehaviour
     public PlayerSoundController playerSoundController;
 
     private CharacterController controller;
-    private Animator animator;
     private Vector3 velocity;
     private bool isGrounded;
 
@@ -75,7 +74,6 @@ public class MovementPlayerController : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        animator = GetComponentInChildren<Animator>();
 
         if (playerHealth == null) playerHealth = GetComponent<PlayerHealth>();
 
@@ -195,13 +193,6 @@ public class MovementPlayerController : MonoBehaviour
                 playerSoundController.stopMove();
             }
         }
-
-        if (animator != null)
-        {
-            animator.SetFloat("MoveX", moveInput.x);
-            animator.SetFloat("MoveZ", moveInput.y);
-            animator.SetBool("IsCrouching", IsCrouching);
-        }
     }
 
     private void ToggleCrouch()
@@ -234,6 +225,13 @@ public class MovementPlayerController : MonoBehaviour
             {
                 playerSoundController.stopMove();
                 playerSoundController.playJump();
+            }
+
+            // Disparar la animación de salto en el nuevo script de animaciones
+            MovementPlayerAnimationController animController = GetComponent<MovementPlayerAnimationController>();
+            if (animController != null)
+            {
+                animController.TriggerJump();
             }
 
             float effectiveJumpHeight = jumpHeight;

@@ -8,6 +8,7 @@ public class WeaponSwitcher : MonoBehaviour
 
     [Header("Referencias")]
     public PlayerHealth playerHealth;
+    [SerializeField] private Animator animator; // Referencia al Animator para las animaciones del torso
 
     [Header("Arma Seleccionada")]
     [Tooltip("-1 significa que no tiene ningún arma seleccionada.")]
@@ -38,9 +39,17 @@ public class WeaponSwitcher : MonoBehaviour
 
     void Start()
     {
+        selectedWeapon = -1; // Forzamos el inicio sin armas
+
         if (playerHealth == null)
         {
             playerHealth = GetComponentInParent<PlayerHealth>();
+        }
+
+        // Busca el Animator automáticamente si no está asignado en el Inspector
+        if (animator == null)
+        {
+            animator = GetComponentInParent<Animator>();
         }
 
         // Inicializar el arreglo de desbloqueo según la cantidad de armas hijas
@@ -135,10 +144,29 @@ public class WeaponSwitcher : MonoBehaviour
         int i = 0;
         foreach (Transform weapon in transform)
         {
-            // Desactiva todas si selectedWeapon es -1 o si el índice no coincide
             bool shouldBeActive = (selectedWeapon != -1) && (i == selectedWeapon) && unlockedWeapons[i];
             weapon.gameObject.SetActive(shouldBeActive);
             i++;
+        }
+
+        if (animator != null)
+        {
+            int animatorValue = 0; // Por defecto 0 (Sin arma)
+
+            if (selectedWeapon == -1)
+            {
+                animatorValue = 0; // Sin arma -> WeaponType = 0
+            }
+            else if (selectedWeapon == 0)
+            {
+                animatorValue = 1; // Pistola -> WeaponType = 1
+            }
+            else
+            {
+                animatorValue = 2; // Resto de armas (Rifles) -> WeaponType = 2
+            }
+
+            animator.SetInteger("WeaponType", animatorValue);
         }
     }
 }

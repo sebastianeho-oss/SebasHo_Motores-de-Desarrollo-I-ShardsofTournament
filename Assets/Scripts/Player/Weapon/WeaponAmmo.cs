@@ -119,7 +119,23 @@ public class WeaponAmmo : MonoBehaviour
     private IEnumerator ReloadRoutine()
     {
         isReloading = true;
-        Debug.Log($"Recargando {ammoType}...");
+        Debug.Log($"Iniciando recarga. Munición actual: {currentAmmo}/{magazineSize}");
+
+        Animator animator = GetComponentInParent<Animator>();
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        if (animator != null)
+        {
+            animator.SetTrigger("Reload");
+            Debug.Log("¡Trigger 'Reload' enviado al Animator con éxito!"); // <-- Mira si sale esto en consola
+        }
+        else
+        {
+            Debug.LogError("¡ERROR: No se encontró ningún Animator!");
+        }
 
         // --- REPRODUCIR SONIDO DE RECARGA ---
         if (weaponSoundController != null)
