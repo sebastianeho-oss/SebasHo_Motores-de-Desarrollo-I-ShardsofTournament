@@ -71,8 +71,7 @@ public class WeaponAmmo : MonoBehaviour
     public bool CanShoot()
     {
         bool isAlive = (playerHealth == null || !playerHealth.isDead);
-
-        // Si intenta disparar sin munición, podemos reproducir el sonido de clic vacío
+                
         if (!isReloading && currentAmmo <= 0 && isAlive && !GameManager.IsPaused)
         {
             if (weaponSoundController != null)
@@ -129,7 +128,7 @@ public class WeaponAmmo : MonoBehaviour
 
         if (animator != null)
         {
-            animator.SetTrigger("Reload");
+            animator.SetBool("IsReloading", true);
             Debug.Log("¡Trigger 'Reload' enviado al Animator con éxito!"); // <-- Mira si sale esto en consola
         }
         else

@@ -119,7 +119,11 @@ public class MovementPlayerController : MonoBehaviour
 
             if (cameraTransform != null && allowedToMove)
             {
-                transform.rotation = Quaternion.Euler(0f, cameraTransform.eulerAngles.y, 0f);
+                // Obtener la rotación objetivo basada en la cámara (solo en el eje Y)
+                Quaternion targetRotation = Quaternion.Euler(0f, cameraTransform.eulerAngles.y, 0f);
+
+                // Rotar suavemente el cuerpo del personaje hacia la cámara
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 15f);
             }
 
             if (allowedToMove)

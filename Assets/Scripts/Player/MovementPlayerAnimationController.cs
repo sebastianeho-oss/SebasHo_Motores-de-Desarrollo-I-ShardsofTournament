@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
 public class MovementPlayerAnimationController : MonoBehaviour
 {
     [Header("Referencias Opcionales")]
@@ -8,7 +7,9 @@ public class MovementPlayerAnimationController : MonoBehaviour
     public CinemachineStateController cameraController;
     public PlayerHealth playerHealth;
 
-    private Animator animator;
+    [Header("Referencias")]
+    [SerializeField] private Animator animator; // Opcional: puedes arrastrarlo aquí directo
+
     private CharacterController characterController;
     private PlayerInputActions inputActions;
     private Vector2 moveInput;
@@ -16,7 +17,6 @@ public class MovementPlayerAnimationController : MonoBehaviour
 
     private void Awake()
     {
-        // Inicializamos los inputs locales para leer MoveX y MoveZ de forma independiente
         inputActions = new PlayerInputActions();
         inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         inputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
@@ -27,17 +27,26 @@ public class MovementPlayerAnimationController : MonoBehaviour
 
     void Start()
     {
-        animator = GetComponent<Animator>();
+        // Si no lo arrastraste en el Inspector, lo busca automáticamente en el objeto padre (Player)
+        if (animator == null)
+        {
+            animator = GetComponentInParent<Animator>();
+        }
+
         characterController = GetComponent<CharacterController>();
+        if (characterController == null)
+        {
+            characterController = GetComponentInParent<CharacterController>();
+        }
 
         if (movementController == null)
-            movementController = GetComponent<MovementPlayerController>();
+            movementController = GetComponentInParent<MovementPlayerController>();
 
-        if (cameraController == null && cameraTransformReference())
+        if (cameraController == null)
             cameraController = GetComponentInChildren<CinemachineStateController>();
 
         if (playerHealth == null)
-            playerHealth = GetComponent<PlayerHealth>();
+            playerHealth = GetComponentInParent<PlayerHealth>();
     }
 
     private bool cameraTransformReference() => true;
