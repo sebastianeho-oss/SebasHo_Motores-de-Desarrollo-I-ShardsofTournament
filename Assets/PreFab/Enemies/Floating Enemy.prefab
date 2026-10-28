@@ -236,7 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 686a30f4f5e1a2343963b3902e70b050, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  flySpeed: 4
+  flySpeed: 7
   hoverHeight: 4
   preferredDistance: 18
   floatFrequency: 2

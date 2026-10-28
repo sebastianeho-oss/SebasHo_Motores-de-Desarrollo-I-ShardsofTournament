@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 5739a70c2c18eed4dbb5b61cc924d5fb, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -576,7 +576,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: b2672d7736f691f4ea4369bb58f11539, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12772,7 +12772,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: a2d9b3e2ebb3757479ec785e431d8163, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12785,7 +12785,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
+  m_SelectedEditorRenderState: 2
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -15926,19 +15926,19 @@ Light:
   serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 2
+  m_Intensity: 0.3
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
-    m_Type: 2
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.2
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -15969,7 +15969,7 @@ Light:
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 5000
+  m_ColorTemperature: 4072
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
@@ -15988,13 +15988,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalRotation: {x: 0.8884646, y: -0.19637498, z: -0.16686003, w: 0.3797701}
+  m_LocalPosition: {x: 18.1, y: 31.58, z: -10.27}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 142.462, y: 34.196, z: 36.862}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16012,7 +16012,7 @@ MonoBehaviour:
   m_CustomShadowLayers: 0
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
-  m_SoftShadowQuality: 1
+  m_SoftShadowQuality: 3
   m_RenderingLayersMask:
     serializedVersion: 0
     m_Bits: 1
@@ -18591,12 +18591,29 @@ MonoBehaviour:
   closeButton: {fileID: 578270181}
   counterHUDText: {fileID: 1143587897}
   pageTexts:
-  - Q
-  - U
-  - E
-  - S
-  - O
-  - '?'
+  - En un reino ancestral donde reinaban la paz y la magia, un cataclismo interrumpio
+    la era de esplendor. Un meteorito se estrello en su territorio y corruptos los
+    ideales de su gobernante. En lugar de fe y misticismo, impuso una fria era de
+    ciencia y tecnologia que arrebato la humanidad de sus habitantes.
+  - Un solo habitante logro librarse de la corrupcion y huyo al cosmos. Durante siglos
+    vago por la galaxia trabajando como cazarrecompensas para sobrevivir. Su unico
+    objetivo era volverse mas fuerte y reunir un armamento lo suficientemente avanzado
+    como para regresar y liberar a su pueblo natal.
+  - Fuertemente equipado, el guerrero regreso a su mundo y derroto al ultimo tirano
+    de la dinastia corrupta. Tras derribar el imperio de las maquinas, creyo haber
+    devuelto la libertad a su hogar. Sin embargo, su victoria solo dejo un espacio
+    libre para que una amenaza aun peor tomara el control.
+  - Pronto emergio un culto fanatico dedicado a un ente oscuro. Al inicio eran considerados
+    lunaticos inofensivos, pero rapidamente se volvieron violentos. Un dia, sin explicacion,
+    la agresividad ceso y toda la poblacion quedo sometida bajo un control mental
+    absoluto ante la entidad.
+  - El exiliado acudio al templo para enfrentar a la amenaza y descubrio un portal
+    magico donde habitaba el ser. Sin darle tiempo a reaccionar, la entidad lo arrastro
+    a su dimension, arrojandolo a un desolado campo de batalla conformado por las
+    ruinas de todos los mundos conquistados.
+  - Atrapado en esa guerra eterna, el heroe desaparecio de la historia y su mundo
+    termino borrado por el tiempo. Hoy en dia, su sacrificio habria sido completamente
+    olvidado si no fuera por estas transcripciones que preservan su memoria.
 --- !u!4 &776573590
 Transform:
   m_ObjectHideFlags: 0
@@ -22910,7 +22927,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: bad1e89a35f9fd544b991a3907d89aac, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -26023,7 +26040,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: b2672d7736f691f4ea4369bb58f11539, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -29887,7 +29904,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: a2d9b3e2ebb3757479ec785e431d8163, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -29900,7 +29917,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
+  m_SelectedEditorRenderState: 2
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -31853,7 +31870,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 2100000, guid: a2d9b3e2ebb3757479ec785e431d8163, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

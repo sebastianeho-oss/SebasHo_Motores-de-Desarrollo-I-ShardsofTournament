@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator))] // Asegura que tenga Animator
 public class MeleeEnemy : MonoBehaviour
 {
     [Header("Ajustes de Combate")]
@@ -13,20 +14,21 @@ public class MeleeEnemy : MonoBehaviour
     public string playerTag = "Player";
 
     private NavMeshAgent agent;
+    private Animator animator; // Referencia al Animator
     private Transform playerTransform;
-    private PlayerShield playerShield; // Cambiado a PlayerShield
-    private PlayerHealth playerHealth; // Respaldo opcional
+    private PlayerShield playerShield;
+    private PlayerHealth playerHealth;
     private float nextAttackTime = 0f;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>(); // Inicializar Animator
 
         GameObject playerObj = GameObject.FindGameObjectWithTag(playerTag);
         if (playerObj != null)
         {
             playerTransform = playerObj.transform;
-            // Buscamos primero el escudo y también la salud por respaldo
             playerShield = playerObj.GetComponent<PlayerShield>();
             playerHealth = playerObj.GetComponent<PlayerHealth>();
         }
@@ -39,6 +41,10 @@ public class MeleeEnemy : MonoBehaviour
         if (playerTransform == null) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+
+        // Actualizar el parámetro Speed en el Animator basado en el movimiento del NavMeshAgent
+        float currentSpeed = agent.velocity.magnitude;
+        animator.SetFloat("Speed", currentSpeed);
 
         agent.SetDestination(playerTransform.position);
 
@@ -67,12 +73,17 @@ public class MeleeEnemy : MonoBehaviour
 
     void Attack()
     {
+        // Activar la animación de ataque mediante el Trigger
+        if (animator != null)
+        {
+            animator.SetTrigger("Attack");
+        }
+
         // Validar si el jugador no está muerto antes de atacar
         bool isDead = playerHealth != null && playerHealth.isDead;
 
         if (!isDead)
         {
-            // Atacamos primero al escudo si existe; si no, directamente a la vida
             if (playerShield != null)
             {
                 playerShield.TakeDamage(attackDamage);

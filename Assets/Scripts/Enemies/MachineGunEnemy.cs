@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator))] // Asegura que tenga Animator
 public class MachineGunEnemy : MonoBehaviour
 {
     [Header("Ajustes de Disparo (Ametralladora)")]
@@ -13,11 +14,11 @@ public class MachineGunEnemy : MonoBehaviour
     public float tracerDuration = 0.04f;
 
     [Header("Ajustes de Retirada y Melé")]
-    public float retreatRange = 5f;      // Distancia de confort: si el jugador cruza este radio hacia adentro, el enemigo retrocede
-    public float meleeRange = 1.2f;      // Distancia para ejecutar el ataque cuerpo a cuerpo
-    public float meleeDamage = 15f;      // Daño del ataque cuerpo a cuerpo
-    public float meleePushForce = 5f;    // Fuerza de empuje al jugador
-    public float meleeCooldown = 1.5f;   // Tiempo de espera entre ataques cuerpo a cuerpo
+    public float retreatRange = 5f;
+    public float meleeRange = 1.2f;
+    public float meleeDamage = 15f;
+    public float meleePushForce = 5f;
+    public float meleeCooldown = 1.5f;
 
     [Header("Capas de Colisión")]
     public LayerMask collisionLayers;
@@ -30,6 +31,7 @@ public class MachineGunEnemy : MonoBehaviour
     public string playerTag = "Player";
 
     private NavMeshAgent agent;
+    private Animator animator; // Referencia al Animator
     private Transform playerTransform;
     private float nextFireTime = 0f;
     private float nextMeleeTime = 0f;
@@ -37,6 +39,7 @@ public class MachineGunEnemy : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>(); // Inicializar Animator
 
         GameObject playerObj = GameObject.FindGameObjectWithTag(playerTag);
         if (playerObj != null)
@@ -58,11 +61,15 @@ public class MachineGunEnemy : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
-        // 1. Rango Cuerpo a Cuerpo (Aproximadamente 1 metro o menos)
+        // Actualizar parámetro de velocidad en el Animator basado en la velocidad actual del NavMeshAgent
+        float currentSpeed = agent.velocity.magnitude;
+        animator.SetFloat("Speed", currentSpeed);
+
+        // 1. Rango Cuerpo a Cuerpo
         if (distanceToPlayer <= meleeRange)
         {
             RotateTowardsPlayer();
-            agent.SetDestination(transform.position); // Detener movimiento de navegación normal
+            agent.SetDestination(transform.position);
 
             if (Time.time >= nextMeleeTime)
             {
@@ -70,17 +77,15 @@ public class MachineGunEnemy : MonoBehaviour
                 MeleeAttack();
             }
         }
-        // 2. Rango de Retirada (El jugador entró demasiado en el área del enemigo)
+        // 2. Rango de Retirada
         else if (distanceToPlayer < retreatRange)
         {
-            // Calcular dirección opuesta al jugador para reubicarse/retirarse
             Vector3 dirToPlayer = (playerTransform.position - transform.position).normalized;
             Vector3 retreatPosition = transform.position - dirToPlayer * (retreatRange + 2f);
 
             agent.SetDestination(retreatPosition);
-            // El enemigo deja de disparar mientras retrocede
         }
-        // 3. Rango de Disparo (Distancia media óptima)
+        // 3. Rango de Disparo
         else if (distanceToPlayer <= shootingRange)
         {
             RotateTowardsPlayer();
@@ -115,6 +120,12 @@ public class MachineGunEnemy : MonoBehaviour
     void ShootHitscan()
     {
         if (firePoint == null) return;
+
+        // Activar la animación de disparo mediante el Trigger
+        if (animator != null)
+        {
+            animator.SetTrigger("Shoot");
+        }
 
         Vector3 targetCenter = playerTransform.position + Vector3.up * 1f;
         Vector3 baseDirection = (targetCenter - firePoint.position).normalized;
@@ -174,14 +185,12 @@ public class MachineGunEnemy : MonoBehaviour
 
     void MeleeAttack()
     {
-        // Dañar al jugador (Shield o Health)
         PlayerShield playerShield = playerTransform.GetComponent<PlayerShield>();
         if (playerShield != null) playerShield.TakeDamage(meleeDamage);
 
         PlayerHealth playerHealth = playerTransform.GetComponent<PlayerHealth>();
         if (playerHealth != null) playerHealth.TakeDamage(meleeDamage);
 
-        // Empuje físico si el jugador utiliza CharacterController
         CharacterController playerController = playerTransform.GetComponent<CharacterController>();
         if (playerController != null)
         {
