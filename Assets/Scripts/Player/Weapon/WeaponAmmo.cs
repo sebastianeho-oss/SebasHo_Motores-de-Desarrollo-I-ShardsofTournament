@@ -19,7 +19,7 @@ public class WeaponAmmo : MonoBehaviour
     [Header("Referencias")]
     public PlayerHealth playerHealth;
     private PlayerAmmoInventory playerInventory;
-    private WeaponSoundController weaponSoundController; // <-- Referencia al sonido del arma
+    private WeaponSoundController weaponSoundController;
     private PlayerInputActions inputActions;
 
     public bool IsReloading => isReloading;
@@ -34,7 +34,7 @@ public class WeaponAmmo : MonoBehaviour
     private void OnDisable()
     {
         inputActions.Disable();
-        CancelReload(); // Cancela la recarga al ocultar o cambiar el arma
+        CancelReload();
     }
 
     void Start()
@@ -47,7 +47,6 @@ public class WeaponAmmo : MonoBehaviour
             playerHealth = GetComponentInParent<PlayerHealth>();
         }
 
-        // Auto-asignar el WeaponSoundController del arma
         weaponSoundController = GetComponent<WeaponSoundController>();
         if (weaponSoundController == null)
         {
@@ -129,14 +128,13 @@ public class WeaponAmmo : MonoBehaviour
         if (animator != null)
         {
             animator.SetBool("IsReloading", true);
-            Debug.Log("¡Trigger 'Reload' enviado al Animator con éxito!"); // <-- Mira si sale esto en consola
+            Debug.Log("¡Trigger 'Reload' enviado al Animator con éxito!");
         }
         else
         {
             Debug.LogError("¡ERROR: No se encontró ningún Animator!");
         }
 
-        // --- REPRODUCIR SONIDO DE RECARGA ---
         if (weaponSoundController != null)
         {
             weaponSoundController.PlayReloadSound();

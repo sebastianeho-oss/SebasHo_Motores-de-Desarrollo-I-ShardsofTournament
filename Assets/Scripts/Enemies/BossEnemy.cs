@@ -22,7 +22,7 @@ public class BossEnemy : MonoBehaviour
     private int currentFirePointIndex = 0;
 
     [Header("Orientación (Si el jefe mira hacia un lado)")]
-    public float rotationOffsetY = 0f;      // Modifica esto en el Inspector (ej. 90, 180 o -90) si el jefe no apunta bien al jugador
+    public float rotationOffsetY = 0f;
 
     [Header("Referencias")]
     public string playerTag = "Player";
@@ -49,7 +49,6 @@ public class BossEnemy : MonoBehaviour
     {
         if (playerTransform == null) return;
 
-        // 1. MOVIMIENTO Y PERSECUCIÓN
         Vector3 directionToPlayer = playerTransform.position - transform.position;
         directionToPlayer.y = 0;
 
@@ -81,20 +80,17 @@ public class BossEnemy : MonoBehaviour
 
         rb.linearVelocity = finalVelocity;
 
-        // 2. ROTACIÓN FORZADA HACIA EL JUGADOR (Con corrección de eje y offset)
         Vector3 lookDir = playerTransform.position - transform.position;
-        lookDir.y = 0f; // Mantiene nivelado el giro horizontalmente
+        lookDir.y = 0f;
 
         if (lookDir != Vector3.zero)
         {
             Quaternion baseRotation = Quaternion.LookRotation(lookDir);
-            // Aplicamos el offset por si el modelo 3D está desalineado de fábrica
             Quaternion correctedRotation = baseRotation * Quaternion.Euler(0, rotationOffsetY, 0);
 
             rb.MoveRotation(Quaternion.Slerp(rb.rotation, correctedRotation, Time.fixedDeltaTime * 10f));
         }
 
-        // 3. ATAQUE EN RÁFAGA
         if (Time.time >= nextAttackTime)
         {
             nextAttackTime = Time.time + attackRate;

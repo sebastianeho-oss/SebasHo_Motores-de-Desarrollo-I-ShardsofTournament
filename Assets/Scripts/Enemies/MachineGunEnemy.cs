@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-[RequireComponent(typeof(Animator))] // Asegura que tenga Animator
+[RequireComponent(typeof(Animator))]
 public class MachineGunEnemy : MonoBehaviour
 {
     [Header("Ajustes de Disparo (Ametralladora)")]
@@ -31,7 +31,7 @@ public class MachineGunEnemy : MonoBehaviour
     public string playerTag = "Player";
 
     private NavMeshAgent agent;
-    private Animator animator; // Referencia al Animator
+    private Animator animator;
     private Transform playerTransform;
     private float nextFireTime = 0f;
     private float nextMeleeTime = 0f;
@@ -39,7 +39,7 @@ public class MachineGunEnemy : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<Animator>(); // Inicializar Animator
+        animator = GetComponent<Animator>();
 
         GameObject playerObj = GameObject.FindGameObjectWithTag(playerTag);
         if (playerObj != null)
@@ -61,11 +61,9 @@ public class MachineGunEnemy : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
-        // Actualizar parámetro de velocidad en el Animator basado en la velocidad actual del NavMeshAgent
         float currentSpeed = agent.velocity.magnitude;
         animator.SetFloat("Speed", currentSpeed);
 
-        // 1. Rango Cuerpo a Cuerpo
         if (distanceToPlayer <= meleeRange)
         {
             RotateTowardsPlayer();
@@ -77,7 +75,7 @@ public class MachineGunEnemy : MonoBehaviour
                 MeleeAttack();
             }
         }
-        // 2. Rango de Retirada
+       
         else if (distanceToPlayer < retreatRange)
         {
             Vector3 dirToPlayer = (playerTransform.position - transform.position).normalized;
@@ -85,7 +83,7 @@ public class MachineGunEnemy : MonoBehaviour
 
             agent.SetDestination(retreatPosition);
         }
-        // 3. Rango de Disparo
+        
         else if (distanceToPlayer <= shootingRange)
         {
             RotateTowardsPlayer();
@@ -98,7 +96,7 @@ public class MachineGunEnemy : MonoBehaviour
                 ShootHitscan();
             }
         }
-        // 4. Fuera de rango (Perseguir al jugador)
+       
         else
         {
             agent.SetDestination(playerTransform.position);
@@ -121,7 +119,6 @@ public class MachineGunEnemy : MonoBehaviour
     {
         if (firePoint == null) return;
 
-        // Activar la animación de disparo mediante el Trigger
         if (animator != null)
         {
             animator.SetTrigger("Shoot");

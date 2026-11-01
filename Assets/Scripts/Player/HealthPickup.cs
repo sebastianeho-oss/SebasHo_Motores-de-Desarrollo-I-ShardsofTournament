@@ -34,12 +34,11 @@ public class HealthPickup : MonoBehaviour
 
         if (playerHealth != null)
         {
-            // Solo curar si el jugador no está muerto y le falta vida
             if (!playerHealth.isDead && playerHealth.currentHealth < playerHealth.maxHealth)
             {
                 playerHealth.Heal(healAmount);
                 Debug.Log($"¡Botiquín recogido! Curado: {healAmount} de salud.");
-                Destroy(gameObject); // Se consume el botiquín
+                Destroy(gameObject);
             }
             else if (playerHealth.currentHealth >= playerHealth.maxHealth)
             {

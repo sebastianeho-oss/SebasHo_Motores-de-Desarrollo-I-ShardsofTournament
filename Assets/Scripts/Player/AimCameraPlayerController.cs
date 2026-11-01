@@ -12,9 +12,6 @@ public class AimCameraPlayerController : MonoBehaviour
     [Tooltip("Altura por defecto del pivote al apuntar si no hay un script de arma asignado.")]
     public float defaultAimTargetHeightOffset = 0.6f;
 
-    // ========================================================================
-    // SECCIÓN DE INCLINACIÓN Y ANIMADOR DEL PERSONAJE
-    // ========================================================================
     [Header("Control de Torso y Animaciones")]
     [Tooltip("Componente Animator de tu personaje (se auto-asigna desde target si está vacío).")]
     public Animator characterAnimator;
@@ -31,7 +28,6 @@ public class AimCameraPlayerController : MonoBehaviour
 
     [Tooltip("Nombre exactamente igual del parámetro booleano en tu Animator Controller.")]
     public string aimingBoolParameter = "isAiming";
-    // ========================================================================
 
     [Header("Posición Normal (Caminar)")]
     public Vector3 normalOffset = new Vector3(0.8f, 0.2f, -2.2f);
@@ -66,10 +62,8 @@ public class AimCameraPlayerController : MonoBehaviour
     public float minYAngle = -35.0f;
     public float maxYAngle = 60.0f;
 
-    // Propiedad pública para consultar el estado desde otros scripts
     public bool IsAiming { get; private set; }
 
-    // Propiedad PÚBLICA para consultar la configuración del arma activa desde otros scripts
     public WeaponAim ActiveWeaponAim
     {
         get
@@ -116,22 +110,18 @@ public class AimCameraPlayerController : MonoBehaviour
     {
         if (target == null) return;
 
-        // Cancelar rotación y apuntado si el juego está en PAUSA o si el jugador murió
         if (GameManager.IsPaused || (playerHealth != null && playerHealth.isDead))
         {
             SetAimingState(false);
             return;
         }
 
-        // Detección de Inputs y Estados
         bool isMoving = Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0;
         bool isSprinting = Input.GetKey(KeyCode.LeftShift) && isMoving;
         
-        // Evaluar si puede apuntar con la bandera canAim
         bool aimingInput = canAim && Input.GetButton("Fire2") && !isSprinting;
         SetAimingState(aimingInput);
 
-        // Determinar valores objetivo según el estado activo
         Vector3 targetOffset = normalOffset;
         float targetFOV = normalFOV;
         float currentSensitivity = mouseSensitivity;
@@ -162,31 +152,26 @@ public class AimCameraPlayerController : MonoBehaviour
             targetFOV = sprintFOV;
         }
 
-        // Transiciones suaves de cámara
         currentOffset = Vector3.Lerp(currentOffset, targetOffset, Time.deltaTime * transitionSpeed);
         currentHeightOffset = Mathf.Lerp(currentHeightOffset, desiredHeight, Time.deltaTime * transitionSpeed);
         cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime * transitionSpeed);
 
-        // Rotación mediante el ratón
         currentX += Input.GetAxis("Mouse X") * currentSensitivity;
         currentY -= Input.GetAxis("Mouse Y") * currentSensitivity;
         currentY = Mathf.Clamp(currentY, minYAngle, maxYAngle);
 
         Quaternion rotation = Quaternion.Euler(currentY, currentX, 0);
 
-        // Posición final de la cámara
         Vector3 targetPosition = target.position + Vector3.up * currentHeightOffset;
         Vector3 finalPosition = targetPosition + rotation * currentOffset;
 
         transform.position = finalPosition;
         transform.rotation = rotation;
 
-        // Inclinación física del torso (después de posicionar la cámara y evaluar las animaciones)
         RotateSpineWithCamera();
     }
 
     
-    /// Actualiza la propiedad IsAiming y sincroniza el Animator Controller    
     private void SetAimingState(bool state)
     {
         IsAiming = state;
@@ -196,13 +181,10 @@ public class AimCameraPlayerController : MonoBehaviour
             characterAnimator.SetBool(aimingBoolParameter, IsAiming);
         }
     }
-        
-    /// Aplica la inclinación vertical a la columna vertebral en tiempo real    
+         
     private void RotateSpineWithCamera()
     {
         if (spineBone == null) return;
-
-        // Inclinamos el hueso localmente usando la rotación actual del mouse (currentY)
         spineBone.Rotate(spineRotationAxis, currentY * spinePitchMultiplier, Space.Self);
     }
 

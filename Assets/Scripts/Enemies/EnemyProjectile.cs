@@ -24,7 +24,6 @@ public class EnemyProjectile : MonoBehaviour
             return;
         }
 
-        // Buscar PlayerShield primero
         PlayerShield playerShield = other.GetComponent<PlayerShield>();
         if (playerShield == null) playerShield = other.GetComponentInParent<PlayerShield>();
         if (playerShield == null) playerShield = other.GetComponentInChildren<PlayerShield>();
@@ -37,7 +36,6 @@ public class EnemyProjectile : MonoBehaviour
             return;
         }
 
-        // Respaldo por si no tiene escudo, buscar PlayerHealth directamente
         PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
         if (playerHealth == null) playerHealth = other.GetComponentInParent<PlayerHealth>();
         if (playerHealth == null) playerHealth = other.GetComponentInChildren<PlayerHealth>();

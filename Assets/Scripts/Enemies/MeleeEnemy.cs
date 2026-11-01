@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-[RequireComponent(typeof(Animator))] // Asegura que tenga Animator
+[RequireComponent(typeof(Animator))]
 public class MeleeEnemy : MonoBehaviour
 {
     [Header("Ajustes de Combate")]
@@ -14,7 +14,7 @@ public class MeleeEnemy : MonoBehaviour
     public string playerTag = "Player";
 
     private NavMeshAgent agent;
-    private Animator animator; // Referencia al Animator
+    private Animator animator;
     private Transform playerTransform;
     private PlayerShield playerShield;
     private PlayerHealth playerHealth;
@@ -23,7 +23,7 @@ public class MeleeEnemy : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<Animator>(); // Inicializar Animator
+        animator = GetComponent<Animator>();
 
         GameObject playerObj = GameObject.FindGameObjectWithTag(playerTag);
         if (playerObj != null)
@@ -42,7 +42,6 @@ public class MeleeEnemy : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
-        // Actualizar el parámetro Speed en el Animator basado en el movimiento del NavMeshAgent
         float currentSpeed = agent.velocity.magnitude;
         animator.SetFloat("Speed", currentSpeed);
 
@@ -73,13 +72,11 @@ public class MeleeEnemy : MonoBehaviour
 
     void Attack()
     {
-        // Activar la animación de ataque mediante el Trigger
         if (animator != null)
         {
             animator.SetTrigger("Attack");
         }
 
-        // Validar si el jugador no está muerto antes de atacar
         bool isDead = playerHealth != null && playerHealth.isDead;
 
         if (!isDead)

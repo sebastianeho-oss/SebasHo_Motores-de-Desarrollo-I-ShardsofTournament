@@ -9,15 +9,12 @@ public class BossHealth : EnemyHealth
 
     void Awake()
     {
-        // Establecer la salud máxima a 1000
         maxHealth = 1000f;
         currentHealth = maxHealth;
     }
 
-    // Sobrescribir el método TakeDamage para reducir el daño recibido
     public override void TakeDamage(float amount)
     {
-        // Modificador de daño: solo percibimos el 50%
         float finalDamage = amount * damageReductionFactor;
         base.TakeDamage(finalDamage);
     }

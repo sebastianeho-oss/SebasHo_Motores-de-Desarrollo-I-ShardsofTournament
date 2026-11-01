@@ -31,21 +31,18 @@ public class WeaponRecoil : MonoBehaviour
         float currentRecoilX = recoilX;
         float currentRecoilY = recoilY;
 
-        // Aumentar retroceso si está en estado Frenesí
         if (ShopManager.Instance != null && ShopManager.Instance.currentPassive == PassiveType.Frenzy && ShopManager.Instance.frenzyActive)
         {
             currentRecoilX *= ShopManager.Instance.frenzyRecoilMultiplier;
             currentRecoilY *= ShopManager.Instance.frenzyRecoilMultiplier;
         }
 
-        // Reducción por apuntar
         if (cameraController != null && cameraController.IsAiming)
         {
             currentRecoilX *= aimRecoilMultiplier;
             currentRecoilY *= aimRecoilMultiplier;
         }
 
-        // Evaluación de estado agachado
         if (movementController != null && movementController.IsCrouching)
         {
             float crouchMultiplier = movementController.IsMoving

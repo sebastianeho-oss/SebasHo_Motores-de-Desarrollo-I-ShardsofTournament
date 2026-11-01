@@ -155,12 +155,10 @@ public class WaveSpawner : MonoBehaviour
 
         WaveData currentWave = waves[currentWaveIndex];
 
-        // --- FASE DE DESCANSO / TIENDA ---
         waveTimer = currentWave.timeBeforeWave;
         isCountingDown = true;
         isWaveActive = false;
 
-        // Reproducir música de descanso con fundido
         PlayMusic(restMusic);
 
         SpawnShopPod();
@@ -176,12 +174,10 @@ public class WaveSpawner : MonoBehaviour
 
         CloseAndDespawnShop();
 
-        // --- FASE DE COMBATE ---
         isWaveActive = true;
         activeWaveRemainingTime = currentWave.waveDuration;
         currentWaveTotalDuration = currentWave.waveDuration;
 
-        // Reproducir música de batalla con fundido
         PlayMusic(battleMusic);
 
         List<GameObject> enemiesToSpawn = BuildEnemyList(currentWave);
@@ -230,7 +226,6 @@ public class WaveSpawner : MonoBehaviour
     {
         float startVolume = musicAudioSource.volume;
 
-        // 1. Fade Out: Baja el volumen de la pista actual gradualmente
         float timer = 0f;
         while (timer < duration)
         {
@@ -243,7 +238,6 @@ public class WaveSpawner : MonoBehaviour
         musicAudioSource.clip = newClip;
         musicAudioSource.Play();
 
-        // 2. Fade In: Sube el volumen de la nueva pista gradualmente
         timer = 0f;
         while (timer < duration)
         {

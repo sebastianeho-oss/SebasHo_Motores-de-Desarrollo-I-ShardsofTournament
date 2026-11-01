@@ -29,24 +29,20 @@ public class WeaponPickup : MonoBehaviour
 
     void Update()
     {
-        // Rotación sobre su propio eje vertical
         transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
 
-        // Movimiento de flotación vertical (senoidal)
         float newY = startPos.y + Mathf.Sin(Time.time * floatSpeed) * floatAmount;
         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        // Buscar el WeaponSwitcher en el collider o en los padres
         WeaponSwitcher switcher = other.GetComponent<WeaponSwitcher>();
         if (switcher == null)
         {
             switcher = other.GetComponentInChildren<WeaponSwitcher>();
         }
 
-        // Buscar el inventario de munición
         PlayerAmmoInventory playerAmmo = other.GetComponent<PlayerAmmoInventory>();
         if (playerAmmo == null)
         {
@@ -55,12 +51,8 @@ public class WeaponPickup : MonoBehaviour
 
         if (switcher != null)
         {
-            // Intentamos desbloquear el arma. (Nota: Si tu WeaponSwitcher devuelve un bool indicando si ya la tenía, puedes usarlo aquí).
-            // Por defecto, llamamos a desbloquear y equipar.
             switcher.UnlockWeapon(weaponIndex, autoEquip: true);
 
-            // Si el jugador ya tiene el arma (o quieres que siempre otorgue munición al pasar por encima), 
-            // le inyectamos la munición a la reserva usando tu método AddAmmo.
             if (playerAmmo != null)
             {
                 int addedAmmo = playerAmmo.AddAmmo(ammoType, ammoAmountOnDuplicate);

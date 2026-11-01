@@ -8,7 +8,7 @@ public class MovementPlayerAnimationController : MonoBehaviour
     public PlayerHealth playerHealth;
 
     [Header("Referencias")]
-    [SerializeField] private Animator animator; // Opcional: puedes arrastrarlo aquí directo
+    [SerializeField] private Animator animator;
 
     private CharacterController characterController;
     private PlayerInputActions inputActions;
@@ -27,7 +27,6 @@ public class MovementPlayerAnimationController : MonoBehaviour
 
     void Start()
     {
-        // Si no lo arrastraste en el Inspector, lo busca automáticamente en el objeto padre (Player)
         if (animator == null)
         {
             animator = GetComponentInParent<Animator>();
@@ -61,33 +60,27 @@ public class MovementPlayerAnimationController : MonoBehaviour
 
     private void UpdateMovementParameters()
     {
-        // Enviamos los valores de los ejes directamente al Animator (igual que lo hacía antes tu script viejo)
         animator.SetFloat("MoveX", moveInput.x, 0.1f, Time.deltaTime);
         animator.SetFloat("MoveZ", moveInput.y, 0.1f, Time.deltaTime);
     }
 
     private void UpdateStateParameters()
     {
-        // 1. isGrounded
         bool isGrounded = characterController != null && characterController.isGrounded;
         animator.SetBool("isGrounded", isGrounded);
 
-        // 2. Detección de Aterrizaje (Land)
         if (!wasGroundedLastFrame && isGrounded)
         {
             animator.SetTrigger("Land");
         }
         wasGroundedLastFrame = isGrounded;
 
-        // 3. IsWalking (Verifica si se está moviendo y en tierra)
         bool isWalking = movementController != null && movementController.IsMoving && isGrounded;
         animator.SetBool("IsWalking", isWalking);
 
-        // 4. isAiming
         bool isAiming = cameraController != null && cameraController.IsAiming;
         animator.SetBool("isAiming", isAiming);
 
-        // 5. IsCrouching
         if (movementController != null)
         {
             animator.SetBool("IsCrouching", movementController.IsCrouching);

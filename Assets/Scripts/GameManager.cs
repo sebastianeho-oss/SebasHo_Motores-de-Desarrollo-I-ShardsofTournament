@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     public GameObject HUD;
     public GameObject gameOverUI;
     public GameObject winUI;
-    public GameObject winCodexUI; // <--- Segunda pantalla de victoria para el Códice completo
+    public GameObject winCodexUI;
     public GameObject pauseUI;
     public GameObject shopUI;
 
@@ -129,7 +129,6 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    // --- MÉTODOS PARA PANTALLA DE VICTORIA ESPECIAL ---
     public void WinCodex()
     {
         if (winCodexUI != null)
@@ -137,8 +136,7 @@ public class GameManager : MonoBehaviour
             winCodexUI.SetActive(true);
         }
         else if (winUI != null)
-        {
-            // Respaldar con la victoria normal si no asignaste el panel en el Inspector
+        {            
             winUI.SetActive(true);
         }
 
@@ -172,7 +170,6 @@ public class GameManager : MonoBehaviour
         Application.Quit();
     }
 
-    // --- MÉTODOS AÑADIDOS PARA EL CÓDICE ---
     public void OpenCodexGame()
     {
         IsPaused = true;

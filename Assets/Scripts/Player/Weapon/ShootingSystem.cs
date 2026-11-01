@@ -33,7 +33,7 @@ public class ShootingSystem : MonoBehaviour
 
     public WeaponRecoil weaponRecoil;
     private WeaponAmmo weaponAmmo;
-    private WeaponSoundController weaponSoundController; // <-- Referencia al sonido del arma
+    private WeaponSoundController weaponSoundController;
     private PlayerInputActions inputActions;
 
     private void Awake()
@@ -52,7 +52,6 @@ public class ShootingSystem : MonoBehaviour
         weaponAmmo = GetComponent<WeaponAmmo>();
         if (playerHealth == null) playerHealth = GetComponentInParent<PlayerHealth>();
 
-        // Auto-asignar el controlador de sonido del arma
         weaponSoundController = GetComponent<WeaponSoundController>();
         if (weaponSoundController == null)
         {
@@ -129,7 +128,6 @@ public class ShootingSystem : MonoBehaviour
     {
         if (mainCamera == null || firePoint == null) return;
 
-        // --- REPRODUCIR SONIDO DE DISPARO ---
         if (weaponSoundController != null)
         {
             weaponSoundController.PlayShootSound();

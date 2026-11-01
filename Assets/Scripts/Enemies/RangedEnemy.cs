@@ -13,7 +13,7 @@ public class RangedEnemyWithAnimations : MonoBehaviour
     public Transform firePoint;
 
     [Header("Ajustes de Retirada y Movimiento")]
-    public float runSpeed = 6f;          // Velocidad al correr
+    public float runSpeed = 6f;
     public float retreatRange = 4f;
     public float meleeRange = 1.2f;
     public float meleeDamage = 15f;
@@ -51,13 +51,11 @@ public class RangedEnemyWithAnimations : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
-        // Enviar la velocidad actual al Animator para que ejecute la animación de correr/caminar
         if (animator != null)
         {
             animator.SetFloat("Speed", agent.velocity.magnitude);
         }
 
-        // 1. Rango Cuerpo a Cuerpo
         if (distanceToPlayer <= meleeRange)
         {
             RotateTowardsPlayer();
@@ -69,18 +67,18 @@ public class RangedEnemyWithAnimations : MonoBehaviour
                 MeleeAttack();
             }
         }
-        // 2. Rango de Retirada
+       
         else if (distanceToPlayer < retreatRange)
         {
             Vector3 dirToPlayer = (playerTransform.position - transform.position).normalized;
             Vector3 retreatPosition = transform.position - dirToPlayer * (retreatRange + 2f);
             agent.SetDestination(retreatPosition);
         }
-        // 3. Rango de Disparo / Lanzamiento del proyectil
+        
         else if (distanceToPlayer <= shootingRange)
         {
             RotateTowardsPlayer();
-            agent.SetDestination(transform.position); // Se detiene para apuntar/disparar
+            agent.SetDestination(transform.position);
             agent.stoppingDistance = retreatRange;
 
             if (Time.time >= nextFireTime)
@@ -89,7 +87,7 @@ public class RangedEnemyWithAnimations : MonoBehaviour
                 StartCoroutine(ShootRoutine());
             }
         }
-        // 4. Fuera de rango (Acercarse corriendo)
+        
         else
         {
             agent.SetDestination(playerTransform.position);
@@ -110,14 +108,11 @@ public class RangedEnemyWithAnimations : MonoBehaviour
 
     IEnumerator ShootRoutine()
     {
-        // Activar la animación de disparo / lanzamiento
         if (animator != null)
         {
             animator.SetTrigger("Throw");
         }
-
-        // Opcional: Pequeña pausa (delay) para que la instanciación de la bala coincida 
-        // exactamente con el fotograma donde el personaje realiza el gesto de arrojar/disparar.
+                
         yield return new WaitForSeconds(0.3f);
 
         if (projectilePrefab != null && firePoint != null)

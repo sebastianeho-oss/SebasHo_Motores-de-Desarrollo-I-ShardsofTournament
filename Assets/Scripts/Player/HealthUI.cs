@@ -1,36 +1,36 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections; // Necesario para las Corrutinas
+using System.Collections;
 
 public class HealthUI : MonoBehaviour
 {
     [Header("Referencias UI")]
-    public Image healthFillImage;        // Imagen con Image Type: Filled
-    public TextMeshProUGUI healthText;   // Texto de la cifra (TMP)
+    public Image healthFillImage;
+    public TextMeshProUGUI healthText;
 
     [Header("Panel de Alerta de Vida Baja (Permanente)")]
-    public GameObject lowHealthPanel;    // Panel rojo para cuando estás bajo de vida
+    public GameObject lowHealthPanel;
 
     [Header("Efecto de Daño (Flash Rojo)")]
-    public Image damageFlashImage;       // Imagen UI en pantalla completa que parpadea al recibir daño
-    public float flashDuration = 0.25f;  // Cuánto dura el destello en pantalla
+    public Image damageFlashImage;
+    public float flashDuration = 0.25f;
     private Coroutine flashCoroutine;
 
     [Header("Referencia del Jugador")]
-    public PlayerHealth playerHealth;    // Script PlayerHealth del personaje
+    public PlayerHealth playerHealth;
 
     [Header("Efecto Visual de la Barra")]
-    public float fillSpeed = 5f;         // Velocidad de suavizado de la barra
+    public float fillSpeed = 5f;
 
     [Tooltip("Gradiente original para la barra de vida.")]
-    public Gradient healthGradient;      // Gradiente configurable desde el Inspector
+    public Gradient healthGradient;
 
     [Header("Configuración de Color del Texto (Current)")]
-    [SerializeField] private float alertThreshold = 25f;          // Umbral crítico (<= 25)
-    [SerializeField] private Color normalTextColor = Color.white; // Color normal (> 50%)
-    [SerializeField] private Color halfTextColor = Color.yellow;  // Color intermedio a la mitad (<= 50%)
-    [SerializeField] private Color alertTextColor = Color.red;    // Color en rojo (<= 25)
+    [SerializeField] private float alertThreshold = 25f;
+    [SerializeField] private Color normalTextColor = Color.white;
+    [SerializeField] private Color halfTextColor = Color.yellow;
+    [SerializeField] private Color alertTextColor = Color.red;
 
     void Start()
     {
@@ -45,7 +45,6 @@ public class HealthUI : MonoBehaviour
             }
         }
 
-        // Asegurarse de que los paneles comiencen apagados / transparentes
         if (lowHealthPanel != null)
         {
             lowHealthPanel.SetActive(false);
@@ -65,7 +64,6 @@ public class HealthUI : MonoBehaviour
 
         float targetFill = playerHealth.currentHealth / playerHealth.maxHealth;
 
-        // Transición suave de la barra usando tu gradiente original
         if (healthFillImage != null)
         {
             healthFillImage.fillAmount = Mathf.Lerp(healthFillImage.fillAmount, targetFill, Time.deltaTime * fillSpeed);
@@ -76,7 +74,6 @@ public class HealthUI : MonoBehaviour
             }
         }
 
-        // Actualizar cifra en pantalla y cambiar el color SOLO del texto
         if (healthText != null)
         {
             int currentHP = Mathf.CeilToInt(playerHealth.currentHealth);
@@ -84,19 +81,17 @@ public class HealthUI : MonoBehaviour
 
             healthText.text = $"{currentHP} / {maxHP}";
 
-            // Lógica de colores exclusiva para el número actual y activación del Panel de vida baja
             if (playerHealth.currentHealth <= alertThreshold)
             {
-                healthText.color = alertTextColor; // Rojo cuando es <= 25
+                healthText.color = alertTextColor;
 
                 if (lowHealthPanel != null && !lowHealthPanel.activeSelf)
                 {
-                    lowHealthPanel.SetActive(true); // Activa el panel rojo permanente de vida baja
+                    lowHealthPanel.SetActive(true);
                 }
             }
             else
             {
-                // Si la salud vuelve a subir (por curación), apagamos el panel de vida baja
                 if (lowHealthPanel != null && lowHealthPanel.activeSelf)
                 {
                     lowHealthPanel.SetActive(false);
@@ -104,17 +99,16 @@ public class HealthUI : MonoBehaviour
 
                 if (playerHealth.currentHealth <= playerHealth.maxHealth * 0.5f)
                 {
-                    healthText.color = halfTextColor;  // Color intermedio al llegar a la mitad (50%)
+                    healthText.color = halfTextColor;
                 }
                 else
                 {
-                    healthText.color = normalTextColor; // Color normal por encima de la mitad
+                    healthText.color = normalTextColor;
                 }
             }
         }
     }
 
-    // Método público para disparar el destello rojo (llamado desde PlayerHealth)
     public void TriggerDamageFlash()
     {
         if (damageFlashImage != null)
@@ -129,14 +123,12 @@ public class HealthUI : MonoBehaviour
 
     private IEnumerator DamageFlashRoutine()
     {
-        // Pone la imagen totalmente roja y opaca de golpe
         Color startColor = damageFlashImage.color;
-        startColor.a = 0.6f; // Ajusta este valor (0 a 1) para cambiar qué tan intenso es el rojo
+        startColor.a = 0.6f;
         damageFlashImage.color = startColor;
 
         float elapsed = 0f;
 
-        // Hace un desvanecimiento (Fade Out) suave hasta que desaparezca
         while (elapsed < flashDuration)
         {
             elapsed += Time.deltaTime;
@@ -149,7 +141,6 @@ public class HealthUI : MonoBehaviour
             yield return null;
         }
 
-        // Asegurar que quede completamente transparente al terminar
         Color endColor = damageFlashImage.color;
         endColor.a = 0f;
         damageFlashImage.color = endColor;

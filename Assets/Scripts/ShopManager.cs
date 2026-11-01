@@ -2,7 +2,6 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 
-// Enumerador para definir la pasiva equipada (Solo una a la vez)
 public enum PassiveType { None, Frenzy, Tank, Greed }
 
 public class ShopManager : MonoBehaviour
@@ -17,7 +16,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private GameObject mainShopButtons;
     [SerializeField] private GameObject attributesSectionPanel;
     [SerializeField] private GameObject passiveSectionPanel;
-    [SerializeField] private GameObject resupplySectionPanel; // Nuevo panel de reabastecimiento
+    [SerializeField] private GameObject resupplySectionPanel;
 
     [Header("Textos UI General")]
     [SerializeField] private TextMeshProUGUI coinsText;
@@ -41,8 +40,8 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private MovementPlayerController playerMovement;
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private PlayerShield playerShield;
-    [SerializeField] private PlayerAmmoInventory ammoInventory; // Inventario de munición
-    [SerializeField] private WeaponSwitcher weaponSwitcher; // Selector de armas activas
+    [SerializeField] private PlayerAmmoInventory ammoInventory;
+    [SerializeField] private WeaponSwitcher weaponSwitcher;
 
     [Header("Límites y Niveles (Máximo 3)")]
     [SerializeField] private int maxSpeedLevel = 3;
@@ -72,7 +71,7 @@ public class ShopManager : MonoBehaviour
     [Header("Pasiva 2: Tanque")]
     public int tankKillStacks = 0;
     public int maxTankStacks = 10;
-    public float tankStackDuration = 20f; // Tiempo de duración de las acumulaciones (20 segundos)
+    public float tankStackDuration = 20f;
     private Coroutine tankTimerCoroutine;
 
     [Header("Pasiva 3: Codicia")]
@@ -104,7 +103,6 @@ public class ShopManager : MonoBehaviour
         if (resupplySectionPanel != null) resupplySectionPanel.SetActive(false);
         if (mainShopButtons != null) mainShopButtons.SetActive(true);
 
-        // Auto-asignación de referencias si no se arrastraron en el Inspector
         if (playerHealth == null) playerHealth = FindAnyObjectByType<PlayerHealth>();
         if (playerShield == null) playerShield = FindAnyObjectByType<PlayerShield>();
         if (ammoInventory == null) ammoInventory = FindAnyObjectByType<PlayerAmmoInventory>();
@@ -115,7 +113,6 @@ public class ShopManager : MonoBehaviour
 
     public void AddCoins(int amount)
     {
-        // PASIVA 3: Duplica las monedas obtenidas (+100%)
         if (currentPassive == PassiveType.Greed)
         {
             amount *= 2;
@@ -154,7 +151,6 @@ public class ShopManager : MonoBehaviour
 
         coins -= price;
 
-        // Limpiar temporadores y acumulaciones anteriores
         ResetPassiveStates();
 
         currentPassive = newPassive;
@@ -172,7 +168,6 @@ public class ShopManager : MonoBehaviour
         if (tankTimerCoroutine != null) StopCoroutine(tankTimerCoroutine);
     }
 
-    // Se invoca cuando muere cualquier enemigo
     public void OnEnemyKilled()
     {
         if (currentPassive == PassiveType.Frenzy)
@@ -187,7 +182,6 @@ public class ShopManager : MonoBehaviour
                 tankKillStacks++;
             }
 
-            // Reiniciar el temporizador de 20 segundos cada vez que mata un enemigo
             if (tankTimerCoroutine != null) StopCoroutine(tankTimerCoroutine);
             tankTimerCoroutine = StartCoroutine(TankStackTimerRoutine());
 
@@ -215,7 +209,6 @@ public class ShopManager : MonoBehaviour
     {
         if (currentPassive == PassiveType.Tank)
         {
-            // Cada acumulación otorga +10% de daño extra (0.10f)
             return 1f + (tankKillStacks * 0.10f);
         }
         return 1f;
@@ -373,7 +366,6 @@ public class ShopManager : MonoBehaviour
 
     #region Lógica de Reabastecimiento Flexible (Parcial o Total)
 
-    // --- BOTÓN 1: Reabastecer Salud Flexible ---
     public void BuyResupplyHealth()
     {
         if (playerHealth == null) playerHealth = FindAnyObjectByType<PlayerHealth>();
@@ -393,7 +385,6 @@ public class ShopManager : MonoBehaviour
 
         float missingHealth = playerHealth.maxHealth - playerHealth.currentHealth;
 
-        // Costo ideal para rellenar todo lo que falta (1 moneda por cada 1% faltante)
         int idealCost = Mathf.CeilToInt(100f * (missingHealth / playerHealth.maxHealth));
 
         int coinsToSpend;
@@ -401,19 +392,15 @@ public class ShopManager : MonoBehaviour
 
         if (coins >= idealCost)
         {
-            // Tiene suficientes monedas para rellenar al 100% lo que falta
             coinsToSpend = idealCost;
             healthRestored = missingHealth;
         }
         else
         {
-            // No le alcanza para el 100%, gasta todas las monedas disponibles proporcionalmente
             coinsToSpend = coins;
-            // Cada moneda equivale a un 1% del total máximo de salud que se puede recuperar
             float healthPerCoin = playerHealth.maxHealth / 100f;
             healthRestored = coinsToSpend * healthPerCoin;
 
-            // Asegurar que no cure más de lo que realmente falta
             if (healthRestored > missingHealth) healthRestored = missingHealth;
         }
 
@@ -424,7 +411,6 @@ public class ShopManager : MonoBehaviour
         Debug.Log($"¡Salud reabastecida parcialmente! Se gastaron {coinsToSpend} monedas y se recuperaron {healthRestored} puntos de salud.");
     }
 
-    // --- BOTÓN 2: Reabastecer Escudo Flexible ---
     public void BuyResupplyShield()
     {
         if (playerShield == null) playerShield = FindAnyObjectByType<PlayerShield>();
@@ -469,7 +455,6 @@ public class ShopManager : MonoBehaviour
         Debug.Log($"¡Escudo reabastecido parcialmente! Se gastaron {coinsToSpend} monedas y se recuperaron {shieldRestored} puntos de escudo.");
     }
 
-    // --- BOTÓN 3: Reabastecer Munición Flexible ---
     public void BuyResupplyActiveWeaponAmmo()
     {
         if (weaponSwitcher == null) weaponSwitcher = FindAnyObjectByType<WeaponSwitcher>();
@@ -532,17 +517,15 @@ public class ShopManager : MonoBehaviour
         else
         {
             coinsToSpend = coins;
-            // Cada moneda otorga un 1% del total máximo de munición combinada del arma
             float ammoPerCoin = (float)totalMaxAmmo / 100f;
             ammoToRestore = Mathf.FloorToInt(coinsToSpend * ammoPerCoin);
 
-            if (ammoToRestore < 1 && coinsToSpend > 0) ammoToRestore = 1; // Asegurar al menos 1 bala si gasta monedas
+            if (ammoToRestore < 1 && coinsToSpend > 0) ammoToRestore = 1;
             if (ammoToRestore > ammoNeeded) ammoToRestore = ammoNeeded;
         }
 
         coins -= coinsToSpend;
 
-        // Distribuir primero las balas al cargador actual hasta llenarlo, y el sobrante a la reserva
         int spaceInMagazine = maxMagazine - currentMagazine;
         if (ammoToRestore <= spaceInMagazine)
         {

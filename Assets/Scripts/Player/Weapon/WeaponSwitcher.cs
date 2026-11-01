@@ -39,24 +39,21 @@ public class WeaponSwitcher : MonoBehaviour
 
     void Start()
     {
-        selectedWeapon = -1; // Forzamos el inicio sin armas
 
         if (playerHealth == null)
         {
             playerHealth = GetComponentInParent<PlayerHealth>();
         }
 
-        // Busca el Animator automáticamente si no está asignado en el Inspector
         if (animator == null)
         {
             animator = GetComponentInParent<Animator>();
         }
 
-        // Inicializar el arreglo de desbloqueo según la cantidad de armas hijas
         int childCount = transform.childCount;
         if (unlockedWeapons == null || unlockedWeapons.Length != childCount)
         {
-            unlockedWeapons = new bool[childCount]; // Todas inician en false
+            unlockedWeapons = new bool[childCount];
         }
 
         SelectWeapon();
@@ -71,7 +68,6 @@ public class WeaponSwitcher : MonoBehaviour
 
         if (scrollValue > 0f)
         {
-            // Busca el siguiente índice desbloqueado
             int next = selectedWeapon;
             do
             {
@@ -82,7 +78,6 @@ public class WeaponSwitcher : MonoBehaviour
         }
         else if (scrollValue < 0f)
         {
-            // Busca el índice anterior desbloqueado
             int prev = selectedWeapon;
             do
             {
@@ -101,8 +96,6 @@ public class WeaponSwitcher : MonoBehaviour
     private void SelectWeaponIndex(int index)
     {
         if (!CanSwitch()) return;
-
-        // Solo equipa si el índice existe, está desbloqueado y es diferente al actual
         if (index >= 0 && index < transform.childCount && unlockedWeapons[index] && selectedWeapon != index)
         {
             selectedWeapon = index;
@@ -151,19 +144,19 @@ public class WeaponSwitcher : MonoBehaviour
 
         if (animator != null)
         {
-            int animatorValue = 0; // Por defecto 0 (Sin arma)
+            int animatorValue = 0;
 
             if (selectedWeapon == -1)
             {
-                animatorValue = 0; // Sin arma -> WeaponType = 0
+                animatorValue = 0;
             }
             else if (selectedWeapon == 0)
             {
-                animatorValue = 1; // Pistola -> WeaponType = 1
+                animatorValue = 1;
             }
             else
             {
-                animatorValue = 2; // Resto de armas (Rifles) -> WeaponType = 2
+                animatorValue = 2;
             }
 
             animator.SetInteger("WeaponType", animatorValue);

@@ -119,10 +119,7 @@ public class MovementPlayerController : MonoBehaviour
 
             if (cameraTransform != null && allowedToMove)
             {
-                // Obtener la rotación objetivo basada en la cámara (solo en el eje Y)
                 Quaternion targetRotation = Quaternion.Euler(0f, cameraTransform.eulerAngles.y, 0f);
-
-                // Rotar suavemente el cuerpo del personaje hacia la cámara
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 15f);
             }
 
@@ -146,16 +143,15 @@ public class MovementPlayerController : MonoBehaviour
 
                     if (isAiming) currentSpeed *= aimSpeedMultiplier;
 
-                    // --- PASIVAS DE VELOCIDAD ---
                     if (ShopManager.Instance != null)
                     {
                         if (ShopManager.Instance.currentPassive == PassiveType.Frenzy && ShopManager.Instance.frenzyActive)
                         {
-                            currentSpeed *= 1.60f; // +60% de velocidad al matar
+                            currentSpeed *= 1.60f;
                         }
                         else if (ShopManager.Instance.currentPassive == PassiveType.Tank)
                         {
-                            currentSpeed *= 0.70f; // 30% más lento
+                            currentSpeed *= 0.70f;
                         }
                     }
 
@@ -182,7 +178,6 @@ public class MovementPlayerController : MonoBehaviour
             controller.Move(velocity * Time.deltaTime);
         }
 
-        // Control del sonido de pasos en bucle
         if (IsMoving && isGrounded)
         {
             if (playerSoundController != null)
@@ -224,14 +219,12 @@ public class MovementPlayerController : MonoBehaviour
 
             IsCrouching = false;
 
-            // Reproducir salto y cortar sonido de caminar al instante
             if (playerSoundController != null)
             {
                 playerSoundController.stopMove();
                 playerSoundController.playJump();
             }
 
-            // Disparar la animación de salto en el nuevo script de animaciones
             MovementPlayerAnimationController animController = GetComponent<MovementPlayerAnimationController>();
             if (animController != null)
             {

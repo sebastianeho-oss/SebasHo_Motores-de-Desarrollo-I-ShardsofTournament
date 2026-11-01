@@ -8,7 +8,7 @@ public class PlayerShield : MonoBehaviour
 
     [Header("Mitigación de Daño Base")]
     [Range(0f, 1f)]
-    public float shieldMitigation = 0.70f; // 70% mitigado por el escudo por defecto
+    public float shieldMitigation = 0.70f;
 
     [Header("Referencias")]
     public PlayerHealth playerHealth;
@@ -30,27 +30,24 @@ public class PlayerShield : MonoBehaviour
 
         float incomingDamage = amount;
 
-        // --- PENALIZACIONES DE DAÑO RECIBIDO POR PASIVAS ---
         if (ShopManager.Instance != null)
         {
             var passive = ShopManager.Instance.currentPassive;
 
             if (passive == PassiveType.Frenzy && ShopManager.Instance.frenzyActive)
             {
-                incomingDamage *= ShopManager.Instance.frenzyIncomingDamageMultiplier; // Daño mayor en Frenesí
+                incomingDamage *= ShopManager.Instance.frenzyIncomingDamageMultiplier;
             }
             else if (passive == PassiveType.Greed)
             {
-                incomingDamage *= ShopManager.Instance.greedIncomingDamageMultiplier; // Daño mayor en Codicia
+                incomingDamage *= ShopManager.Instance.greedIncomingDamageMultiplier;
             }
         }
 
-        // --- PASIVA 2: TANQUE ---
         if (ShopManager.Instance != null && ShopManager.Instance.currentPassive == PassiveType.Tank)
         {
             if (currentShield > 0f)
             {
-                // El daño se dirige 100% al escudo y se reduce en un 80% (entra solo el 20%)
                 float damageToShield = incomingDamage * 0.20f;
                 currentShield -= damageToShield;
 
@@ -59,13 +56,10 @@ public class PlayerShield : MonoBehaviour
                     currentShield = 0f;
                     Debug.Log("¡El escudo del Tanque se ha roto!");
                 }
-
-                // La salud permanece 100% intacta mientras exista escudo
                 return;
             }
             else
             {
-                // Con escudo roto (0), el daño pasa a la salud pero reducido un 70% (entra el 30%)
                 float damageToHealth = incomingDamage * 0.30f;
                 if (playerHealth != null)
                 {
@@ -75,7 +69,6 @@ public class PlayerShield : MonoBehaviour
             }
         }
 
-        // --- COMPORTAMIENTO NORMAL (SIN PASIVA TANQUE) ---
         if (currentShield > 0f)
         {
             float damageToShield = incomingDamage * shieldMitigation;

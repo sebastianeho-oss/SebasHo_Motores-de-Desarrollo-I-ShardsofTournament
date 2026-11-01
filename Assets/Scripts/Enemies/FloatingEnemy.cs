@@ -3,15 +3,15 @@ using UnityEngine;
 public class FloatingEnemy : MonoBehaviour
 {
     [Header("Ajustes de Vuelo y Distancia")]
-    public float flySpeed = 4f;             // Velocidad de desplazamiento
-    public float hoverHeight = 4f;          // Altura a la que flota del suelo
-    public float preferredDistance = 18f;   // Distancia lejana que quiere mantener
-    public float floatFrequency = 2f;       // Velocidad del bamboleo de flotación
-    public float floatAmplitude = 0.5f;     // Altura del bamboleo
+    public float flySpeed = 4f;
+    public float hoverHeight = 4f; 
+    public float preferredDistance = 18f;
+    public float floatFrequency = 2f;
+    public float floatAmplitude = 0.5f;
 
     [Header("Ajustes de Ataque")]
-    public float attackRate = 2.5f;         // Frecuencia de bolas de energía
-    public GameObject energyBallPrefab;     // Prefab del proyectil flotante
+    public float attackRate = 2.5f;
+    public GameObject energyBallPrefab;
     public Transform firePoint;
 
     [Header("Referencias")]
@@ -33,30 +33,24 @@ public class FloatingEnemy : MonoBehaviour
     {
         if (playerTransform == null) return;
 
-        // 1. Manejo de posición objetivo (Mantener distancia y altura)
         Vector3 directionFromPlayer = (transform.position - playerTransform.position);
-        directionFromPlayer.y = 0; // Solo distancia en el plano horizontal
-
-        // Calcular posición objetivo a 'preferredDistance' del jugador
+        directionFromPlayer.y = 0;
+                
         Vector3 targetPosition = playerTransform.position + directionFromPlayer.normalized * preferredDistance;
         targetPosition.y = playerTransform.position.y + hoverHeight;
 
-        // Movimiento suave hacia el objetivo
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * flySpeed);
 
-        // 2. Efecto visual de Flotación (Onda Sinusoidal)
         float hoverOffsetY = Mathf.Sin(Time.time * floatFrequency) * floatAmplitude;
         transform.position += Vector3.up * hoverOffsetY * Time.deltaTime;
 
-        // 3. Orientación hacia el jugador
         Vector3 lookDir = (playerTransform.position - transform.position).normalized;
         if (lookDir != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(lookDir);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
         }
-
-        // 4. Disparo
+               
         if (Time.time >= nextAttackTime)
         {
             nextAttackTime = Time.time + attackRate;

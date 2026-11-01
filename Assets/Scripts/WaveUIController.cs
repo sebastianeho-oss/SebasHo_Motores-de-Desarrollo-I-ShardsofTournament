@@ -14,15 +14,14 @@ public class WaveUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI activeWaveTimerText;
 
     [Header("Configuración de Color del Temporizador de Oleada")]
-    [SerializeField] private Color normalTimerColor = Color.white;  // Color normal al iniciar
-    [SerializeField] private Color halfTimerColor = Color.yellow;   // Color al llegar a la mitad (50%)
-    [SerializeField] private Color alertTimerColor = Color.red;     // Color rojo cuando faltan 10 segundos o menos
+    [SerializeField] private Color normalTimerColor = Color.white;
+    [SerializeField] private Color halfTimerColor = Color.yellow;
+    [SerializeField] private Color alertTimerColor = Color.red;
 
     void Update()
     {
         if (waveSpawner == null) return;
 
-        // Ocultar o mostrar el texto de la oleada según si está en tiempo de espera
         if (waveText != null)
         {
             if (waveSpawner.IsCountingDown)
@@ -59,7 +58,6 @@ public class WaveUIController : MonoBehaviour
             }
         }
 
-        // Muestra la cuenta atrás de la horda activa y aplica los cambios de color
         if (activeWaveTimerText != null)
         {
             if (waveSpawner.IsWaveActive)
@@ -71,18 +69,17 @@ public class WaveUIController : MonoBehaviour
                 int seconds = Mathf.FloorToInt(time % 60f);
                 activeWaveTimerText.text = $"{minutes:00}:{seconds:00}";
 
-                // --- LÓGICA DE COLORES PARA EL TEMPORIZADOR ---
                 if (time <= 10f)
                 {
-                    activeWaveTimerText.color = alertTimerColor; // Rojo a los 10 segundos o menos
+                    activeWaveTimerText.color = alertTimerColor;
                 }
                 else if (time <= (waveSpawner.CurrentWaveTotalDuration * 0.5f))
                 {
-                    activeWaveTimerText.color = halfTimerColor;  // Amarillo al llegar a la mitad del tiempo
+                    activeWaveTimerText.color = halfTimerColor;
                 }
                 else
                 {
-                    activeWaveTimerText.color = normalTimerColor; // Color normal en la primera mitad
+                    activeWaveTimerText.color = normalTimerColor;
                 }
             }
             else

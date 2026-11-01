@@ -43,9 +43,6 @@ public class CodexManager : MonoBehaviour
         UpdateHUDCounter();
     }
 
-    /// <summary>
-    /// Incrementa el contador de páginas recogidas y actualiza el HUD.
-    /// </summary>
     public void PageCollected()
     {
         collectedPagesCount++;

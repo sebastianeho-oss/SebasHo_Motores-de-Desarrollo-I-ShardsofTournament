@@ -84,7 +84,6 @@ public class CinemachineStateController : MonoBehaviour
             playerHealth = playerTarget.GetComponent<PlayerHealth>();
         }
 
-        // Obtiene o autogenera el componente de impulso en este mismo objeto
         if (impulseSource == null)
         {
             impulseSource = GetComponent<CinemachineImpulseSource>();
@@ -158,12 +157,10 @@ public class CinemachineStateController : MonoBehaviour
         currentY = Mathf.Clamp(currentY, minYAngle, maxYAngle);
     }
 
-    // --- MÉTODO DE INSTANCIA VÁLIDO PARA CINEMACHINE 3.x ---
     public void TriggerCameraShake()
     {
         if (impulseSource != null)
         {
-            // Llama al método de instancia correctamente
             impulseSource.GenerateImpulse(Vector3.one * 1.5f);
         }
     }

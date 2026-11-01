@@ -18,7 +18,6 @@ public class EnemyHealth : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    // AQUÍ AGREGAMOS 'virtual' para permitir que los jefes u otros enemigos lo modifiquen
     public virtual void TakeDamage(float amount)
     {
         if (isDead) return;
@@ -36,10 +35,8 @@ public class EnemyHealth : MonoBehaviour
     {
         isDead = true;
 
-        // Notificar monedas
         OnEnemyDiedWithReward?.Invoke(coinReward);
 
-        // Notificar activación de pasivas al ShopManager
         if (ShopManager.Instance != null)
         {
             ShopManager.Instance.OnEnemyKilled();

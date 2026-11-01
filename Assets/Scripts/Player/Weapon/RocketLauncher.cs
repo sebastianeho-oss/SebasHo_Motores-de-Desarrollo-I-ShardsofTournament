@@ -19,7 +19,7 @@ public class RocketLauncher : MonoBehaviour
 
     private float nextFireTime = 0f;
     private WeaponAmmo weaponAmmo;
-    private WeaponSoundController weaponSoundController; // <-- Referencia al sonido del lanzamisiles
+    private WeaponSoundController weaponSoundController;
     private PlayerInputActions inputActions;
 
     private void Awake()
@@ -44,7 +44,6 @@ public class RocketLauncher : MonoBehaviour
             playerHealth = GetComponentInParent<PlayerHealth>();
         }
 
-        // Auto-asignar el controlador de sonido del lanzamisiles
         weaponSoundController = GetComponent<WeaponSoundController>();
         if (weaponSoundController == null)
         {
@@ -81,7 +80,6 @@ public class RocketLauncher : MonoBehaviour
     {
         if (mainCamera == null || firePoint == null) return;
 
-        // --- REPRODUCIR SONIDO DE LANZAMIENTO / EXPLOSIÓN ---
         if (weaponSoundController != null)
         {
             weaponSoundController.PlayShootSound();

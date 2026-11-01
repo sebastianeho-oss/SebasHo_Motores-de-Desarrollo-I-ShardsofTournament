@@ -20,7 +20,6 @@ public class AmmoUI : MonoBehaviour
     {
         if (weaponSwitcher == null || playerInventory == null) return;
 
-        // Si el jugador está desarmado (-1) o el índice está fuera de rango, limpia la UI
         if (weaponSwitcher.selectedWeapon < 0 || weaponSwitcher.selectedWeapon >= weaponSwitcher.transform.childCount)
         {
             ClearUI();

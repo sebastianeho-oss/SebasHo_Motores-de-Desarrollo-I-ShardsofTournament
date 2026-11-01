@@ -48,7 +48,7 @@ public class ShotgunShootingSystem : MonoBehaviour
 
     public WeaponRecoil weaponRecoil;
     private WeaponAmmo weaponAmmo;
-    private WeaponSoundController weaponSoundController; // <-- Referencia al sonido de la escopeta
+    private WeaponSoundController weaponSoundController;
     private PlayerInputActions inputActions;
 
     private void Awake()
@@ -66,7 +66,6 @@ public class ShotgunShootingSystem : MonoBehaviour
         weaponAmmo = GetComponent<WeaponAmmo>();
         if (playerHealth == null) playerHealth = GetComponentInParent<PlayerHealth>();
 
-        // Auto-asignar el controlador de sonido de la escopeta
         weaponSoundController = GetComponent<WeaponSoundController>();
         if (weaponSoundController == null)
         {
@@ -102,7 +101,6 @@ public class ShotgunShootingSystem : MonoBehaviour
     {
         nextFireTime = Time.time + fireRate;
 
-        // --- REPRODUCIR SONIDO DE DISPARO DE LA ESCOPETA ---
         if (weaponSoundController != null)
         {
             weaponSoundController.PlayShootSound();

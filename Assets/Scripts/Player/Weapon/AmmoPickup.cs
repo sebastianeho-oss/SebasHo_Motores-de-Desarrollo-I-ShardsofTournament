@@ -37,7 +37,6 @@ public class AmmoPickup : MonoBehaviour
 
     if (playerInventory != null)
         {
-        // Intenta añadir la munición y nos dice cuántas pildoras/cohetes se añadieron realmente
         int amountAdded = playerInventory.AddAmmo(ammoType, ammoAmount);
 
         if (amountAdded > 0)
